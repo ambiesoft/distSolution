@@ -1,10 +1,12 @@
 import os
 from os.path import isfile, isdir
-from test.test_decimal import file
+import subprocess
+
+
 
 DicregateTotalFileCount = 159
 
-ShouldNotBeFiles = ("folder.wini", "Register.wini", "fukisokueigo.csv", "kanjiq2s.csv")
+ShouldNotBeFiles = ("conf", "folder.wini", "Register.wini", "fukisokueigo.csv", "kanjiq2s.csv")
 ShouldBeFiles = (
     "Ambiesoft.amblib.dll", 
     "Ambiesoft.amblib.pdb", 
@@ -59,8 +61,8 @@ ShouldBeOneOfThem = ("libcfx.dll", "libcfx64.dll")
 
 def checkShouldnotExistFile(dicregatedir):
     """ Return false if a file that should not be distributed exists. """
-    for file in ShouldNotBeFiles:
-        fullpath = dicregatedir + file
+    for f in ShouldNotBeFiles:
+        fullpath = dicregatedir + f
         if isfile(fullpath) or isdir(fullpath):
             print(fullpath + " exists.")
             return False
@@ -68,15 +70,15 @@ def checkShouldnotExistFile(dicregatedir):
     return True
     
 def checkShouldBeFiles(dicregatedir):
-    for file in ShouldBeFiles:
-        fullpath = dicregatedir+file
+    for f in ShouldBeFiles:
+        fullpath = dicregatedir+f
         if( not (isfile(fullpath) or isdir(fullpath))):
             print(fullpath + " not exists.")
             return False
     
     oneofthem = False
-    for file in ShouldBeOneOfThem:
-        fullpath = dicregatedir+file
+    for f in ShouldBeOneOfThem:
+        fullpath = dicregatedir+f
         if(isfile(fullpath)):
             if(oneofthem):
                 print(fullpath + " One of them files duplicating.")
@@ -109,13 +111,48 @@ def work(dicregatedir):
         exit(1)
     
     print ("Total file count = {}".format(getFileCount(dicregatedir)))    
-    print("OK");
 
-def main():
-    work(R"C:/Linkout/Dicregate/")
-    work(R"C:/Linkout/Dicregate64/")
+def getVersionString(dicregateDir):
+    """get version string from history.txt"""
     
+    f = dicregateDir + "history.txt"
+    todo
+    
+def main():
+    targets = (R"C:/Linkout/Dicregate/",R"C:/Linkout/Dicregate64/")
+    for target in targets:
+        # check dir
+        work(target)
+    
+        #archive it
+        parentDir = os.path.abspath(os.path.join(target, os.pardir))
+        dirName = os.path.basename(os.path.dirname(target))
+        archiveexe = os.path.join(parentDir, dirName+".exe")
+        
+        print("==== creating arhive {} ====".format(archiveexe))
+        
+        verstring = getVersionString(target)
+        
+        if(os.path.exists(archiveexe)):
+            print("{} already exists.".format(archiveexe))
+            exit(1)
+        
+        
+        args = [
+            r"C:\LegacyPrograms\7-Zip\7z.exe",
+            "a",
+            "-sfx7z.sfx",
+            archiveexe,
+            target,
+            "-mx9"
+            ]
+        print(args)
+        subprocess.check_call(args)
+
+        
+
 if __name__ == "__main__":
     main()
+    print("Succeeded")
     
     
