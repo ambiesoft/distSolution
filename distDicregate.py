@@ -141,17 +141,13 @@ def main():
     target = targets[0];
     parentDir = os.path.abspath(os.path.join(target, os.pardir))
     dirName = os.path.basename(os.path.dirname(target))
-    
     archiveexe = os.path.join(parentDir, "{}{}{}".format(dirName,verstring,".exe"));
     
     print("==== creating arhive {} ====".format(archiveexe))
     
-    
-    
     if(os.path.exists(archiveexe)):
         print("{} already exists.".format(archiveexe))
         exit(1)
-    
     
     args = [
         r"C:\LegacyPrograms\7-Zip\7z.exe",
