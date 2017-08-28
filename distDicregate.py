@@ -3,8 +3,9 @@ from os.path import isfile, isdir
 import subprocess
 import re
 
-APPNAME = 'distDicregate, check files and archive them'
+APPNAME = 'distDicregate'
 VERSION = '1.0';
+APPDISC = 'check files and archive them'
 
 DicregateTotalFileCount = 159
 
@@ -240,7 +241,8 @@ def getVersionString(dicregateDir):
     
     
 def main():
-    print(APPNAME,VERSION)
+    print('{} {} ({})'.format(APPNAME,VERSION,APPDISC))
+          
     targets = (R"C:/Linkout/Dicregate/",R"C:/Linkout/Dicregate64/")
     verstring="";
     for target in targets:
