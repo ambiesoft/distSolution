@@ -3,6 +3,9 @@ from os.path import isfile, isdir
 import subprocess
 import re
 
+APPNAME = 'distDicregate, check files and archive them'
+VERSION = '1.0';
+
 DicregateTotalFileCount = 159
 
 ShouldNotBeFiles = ("conf", "folder.wini", "Register.wini", "fukisokueigo.csv", "kanjiq2s.csv")
@@ -237,6 +240,7 @@ def getVersionString(dicregateDir):
     
     
 def main():
+    print(APPNAME,VERSION)
     targets = (R"C:/Linkout/Dicregate/",R"C:/Linkout/Dicregate64/")
     verstring="";
     for target in targets:
