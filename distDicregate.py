@@ -1,8 +1,7 @@
 import os
 from os.path import isfile, isdir
 import subprocess
-
-
+import re
 
 DicregateTotalFileCount = 159
 
@@ -115,39 +114,59 @@ def work(dicregatedir):
 def getVersionString(dicregateDir):
     """get version string from history.txt"""
     
-    f = dicregateDir + "history.txt"
-    todo
+    fileName = os.path.join(dicregateDir, "history.txt")
+    with open(fileName, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+        line=lines[0]
+        m = re.match(r'\d\.\d\.\d\.\d', line)
+        return m.group(0)
+    
+    print("Version not found.")
+    exit(1)
+    
     
 def main():
     targets = (R"C:/Linkout/Dicregate/",R"C:/Linkout/Dicregate64/")
+    verstring="";
     for target in targets:
         # check dir
         work(target)
-    
-        #archive it
-        parentDir = os.path.abspath(os.path.join(target, os.pardir))
-        dirName = os.path.basename(os.path.dirname(target))
-        archiveexe = os.path.join(parentDir, dirName+".exe")
-        
-        print("==== creating arhive {} ====".format(archiveexe))
-        
-        verstring = getVersionString(target)
-        
-        if(os.path.exists(archiveexe)):
-            print("{} already exists.".format(archiveexe))
+        vstT = getVersionString(target)
+        if(verstring and verstring != vstT):
+            print("different verstion")
             exit(1)
+        verstring = vstT
         
+    #archive it
+    target = targets[0];
+    parentDir = os.path.abspath(os.path.join(target, os.pardir))
+    dirName = os.path.basename(os.path.dirname(target))
+    
+    archiveexe = os.path.join(parentDir, "{}{}{}".format(dirName,verstring,".exe"));
+    
+    print("==== creating arhive {} ====".format(archiveexe))
+    
+    
+    
+    if(os.path.exists(archiveexe)):
+        print("{} already exists.".format(archiveexe))
+        exit(1)
+    
+    
+    args = [
+        r"C:\LegacyPrograms\7-Zip\7z.exe",
+        "a",
+        "-sfx7z.sfx",
+        archiveexe,
+    ]
+    
+    for t in targets:
+        args.append(t)
         
-        args = [
-            r"C:\LegacyPrograms\7-Zip\7z.exe",
-            "a",
-            "-sfx7z.sfx",
-            archiveexe,
-            target,
-            "-mx9"
-            ]
-        print(args)
-        subprocess.check_call(args)
+    args.append("-mx9");
+    
+    print(args)
+    subprocess.check_call(args)
 
         
 
