@@ -233,7 +233,7 @@ def getVersionString(dicregateDir):
     with open(fileName, "r", encoding="utf-8") as f:
         lines = f.readlines()
         line=lines[0]
-        m = re.match(r'\d\.\d\.\d\.\d', line)
+        m = re.search(r'\d\.\d\.\d\.\d', line)
         return m.group(0)
     
     print("Version not found.")
