@@ -1,7 +1,10 @@
+import sys
 import os
 from os.path import isfile, isdir
 import subprocess
 import re
+from os import getenv
+import timeit
 
 APPNAME = 'distDicregate'
 VERSION = '1.0';
@@ -212,7 +215,8 @@ def getFileCount(d):
     return total
 
 
-def work(dicregatedir):
+def work(target):
+    dicregatedir = target['outdir'];
     print("=== Start Testing {} ===".format(dicregatedir))
     
     if not checkShouldnotExistFile(dicregatedir):
@@ -226,10 +230,12 @@ def work(dicregatedir):
     
     print ("Total file count = {}".format(getFileCount(dicregatedir)))    
 
-def getVersionString(dicregateDir):
+def getVersionString(target):
     """get version string from history.txt"""
     
-    fileName = os.path.join(dicregateDir, "history.txt")
+    dicregatedir = target['outdir'];
+    
+    fileName = os.path.join(dicregatedir, "history.txt")
     with open(fileName, "r", encoding="utf-8") as f:
         lines = f.readlines()
         line=lines[0]
@@ -239,13 +245,80 @@ def getVersionString(dicregateDir):
     print("Version not found.")
     exit(1)
     
+def getMsBuildExe():
+    pf = getenv("ProgramFiles");
+    if pf:
+        pf = os.path.join(pf, R"MSBuild\12.0\Bin\MSBuild.exe")
+        if isfile(pf):
+            return pf
+        
+    pf = getenv("ProgramFiles(x86)")
+    if pf:
+        pf = os.path.join(pf, R"MSBuild\12.0\Bin\MSBuild.exe")
+        if isfile(pf):
+            return pf
+        
+    return None
+
+def build(target):
+    """build dicregate"""
+    msbuildexe = getMsBuildExe()
+    if not msbuildexe:
+        print("MSBuild.exe not found.")
+        exit(1)
+        
+     
+
+    args = [
+        msbuildexe,
+        target['solutionfile'],
+        "/t:zzzDistResource",
+        "/p:Configuration=zzzDist",
+        "/p:Platform={}".format(target["platform"])
+    ]
+     
+    print(args)
+    subprocess.check_call(args)
     
 def main():
+    if sys.version_info[0] < 3:
+        print("Please use python3")
+        print (sys.version)
+        exit(1)
+        
     print('{} {} ({})'.format(APPNAME,VERSION,APPDISC))
-          
-    targets = (R"C:/Linkout/Dicregate/",R"C:/Linkout/Dicregate64/")
+    
+    if sys.argv[1]:
+        solutiondir = sys.argv[1]
+    else: 
+        solutiondir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../Dicregate")
+        
+    solutionfile = os.path.join(solutiondir, "Dicregate2013.sln")
+        
+    if not isfile(solutionfile):
+        print("solution file not found")
+        exit(1)
+    
+    targets = (
+            { 
+                "solutiondir":solutiondir,
+                "solutionfile":solutionfile,
+                "outdir" : R"C:/Linkout/Dicregate/",
+                "platform":"Win32"
+            },
+
+              
+            {
+                "solutiondir":solutiondir,
+                "solutionfile":solutionfile,
+                "outdir" : R"C:/Linkout/Dicregate64/",
+                "platform":"x64"
+            }
+    )
     verstring="";
     for target in targets:
+        # build
+        build(target)
         # check dir
         work(target)
         vstT = getVersionString(target)
@@ -256,15 +329,16 @@ def main():
         
     #archive it
     target = targets[0];
-    parentDir = os.path.abspath(os.path.join(target, os.pardir))
-    dirName = os.path.basename(os.path.dirname(target))
+    outdir=target['outdir']
+    parentDir = os.path.abspath(os.path.join(outdir, os.pardir))
+    dirName = os.path.basename(os.path.dirname(outdir))
     archiveexe = os.path.join(parentDir, "{}{}{}".format(dirName,verstring,".exe"));
     
     print("==== creating arhive {} ====".format(archiveexe))
     
-    if(os.path.exists(archiveexe)):
-        print("{} already exists. Remove it first.".format(archiveexe))
-        exit(1)
+#    if(os.path.exists(archiveexe)):
+#        print("{} already exists. Remove it first.".format(archiveexe))
+#        exit(1)
     
     args = [
         r"C:\LegacyPrograms\7-Zip\7z.exe",
@@ -274,7 +348,7 @@ def main():
     ]
     
     for t in targets:
-        args.append(t)
+        args.append(t['outdir'])
         
     args.append("-mx9");
     
@@ -284,7 +358,10 @@ def main():
         
 
 if __name__ == "__main__":
+    start = timeit.default_timer()
     main()
-    print("Succeeded")
+    stop = timeit.default_timer()
     
+    print("Succeeded ({} sec)".format(stop-start))
+    input('Press ENTER to exit')
     
