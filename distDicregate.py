@@ -288,7 +288,7 @@ def main():
         
     print('{} {} ({})'.format(APPNAME,VERSION,APPDISC))
     
-    if sys.argv[1]:
+    if len(sys.argv) > 1:
         solutiondir = sys.argv[1]
     else: 
         solutiondir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../Dicregate")
