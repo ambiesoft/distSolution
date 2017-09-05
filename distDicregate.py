@@ -291,7 +291,7 @@ def main():
     if len(sys.argv) > 1:
         solutiondir = sys.argv[1]
     else: 
-        solutiondir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../Dicregate")
+        solutiondir = os.path.join(os.path.dirname(os.path.realpath(__file__)), R"../Dicregate\trunk\Dicregate")
         
     solutionfile = os.path.join(solutiondir, "Dicregate2013.sln")
         
