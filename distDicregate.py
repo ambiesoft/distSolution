@@ -176,6 +176,7 @@ ShouldBeFiles = (
 
 ShouldBeOneOfThem = ("libcfx.dll", "libcfx64.dll")
 
+
 def checkShouldnotExistFile(dicregatedir):
     """ Return false if a file that should not be distributed exists. """
     for f in ShouldNotBeFiles:
@@ -220,13 +221,13 @@ def work(target):
     print("=== Start Testing {} ===".format(dicregatedir))
     
     if not checkShouldnotExistFile(dicregatedir):
-        exit(1)
+        myexit(1)
     if not checkShouldBeFiles(dicregatedir):
-        exit(1)
+        myexit(1)
 
     if(DicregateTotalFileCount != getFileCount(dicregatedir)):
         print("{} != {}".format(DicregateTotalFileCount,getFileCount(dicregatedir)))
-        exit(1)
+        myexit(1)
     
     print ("Total file count = {}".format(getFileCount(dicregatedir)))    
 
@@ -243,7 +244,7 @@ def getVersionString(target):
         return m.group(0)
     
     print("Version not found.")
-    exit(1)
+    myexit(1)
     
 def getMsBuildExe():
     pf = getenv("ProgramFiles");
@@ -265,7 +266,7 @@ def build(target):
     msbuildexe = getMsBuildExe()
     if not msbuildexe:
         print("MSBuild.exe not found.")
-        exit(1)
+        myexit(1)
         
      
 
@@ -284,7 +285,7 @@ def main():
     if sys.version_info[0] < 3:
         print("Please use python3")
         print (sys.version)
-        exit(1)
+        myexit(1)
         
     print('{} {} ({})'.format(APPNAME,VERSION,APPDISC))
     
@@ -297,7 +298,7 @@ def main():
         
     if not isfile(solutionfile):
         print("solution file not found")
-        exit(1)
+        myexit(1)
     
     targets = (
             { 
@@ -324,7 +325,7 @@ def main():
         vstT = getVersionString(target)
         if(verstring and verstring != vstT):
             print("different verstion")
-            exit(1)
+            myexit(1)
         verstring = vstT
         
     #archive it
@@ -338,7 +339,7 @@ def main():
     
 #    if(os.path.exists(archiveexe)):
 #        print("{} already exists. Remove it first.".format(archiveexe))
-#        exit(1)
+#        myexit(1)
     
     args = [
         r"C:\LegacyPrograms\7-Zip\7z.exe",
@@ -356,7 +357,10 @@ def main():
     subprocess.check_call(args)
 
         
-
+def myexit(retval):
+    input('Press ENTER to exit')
+    exit(retval)
+    
 if __name__ == "__main__":
     start = timeit.default_timer()
     main()
