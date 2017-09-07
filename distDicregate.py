@@ -182,7 +182,7 @@ def checkShouldnotExistFile(dicregatedir):
     for f in ShouldNotBeFiles:
         fullpath = dicregatedir + f
         if isfile(fullpath) or isdir(fullpath):
-            print(fullpath + " exists.")
+            myexit(fullpath + " exists.")
             return False
     
     return True
@@ -191,7 +191,7 @@ def checkShouldBeFiles(dicregatedir):
     for f in ShouldBeFiles:
         fullpath = dicregatedir+f
         if( not (isfile(fullpath))):
-            print(fullpath + " not exists.")
+            myexit(fullpath + " not exists.")
             return False
     
     oneofthem = False
@@ -199,12 +199,12 @@ def checkShouldBeFiles(dicregatedir):
         fullpath = dicregatedir+f
         if(isfile(fullpath)):
             if(oneofthem):
-                print(fullpath + " One of them files duplicating.")
+                myexit(fullpath + " One of them files duplicating.")
                 return False
             oneofthem = True
             
     if(not oneofthem):
-        print("None of oneofthem files exists.")
+        myexit("None of oneofthem files exists.")
         return False
     
     return True
@@ -216,19 +216,16 @@ def getFileCount(d):
     return total
 
 
-def work(target):
+def checkTarget(target):
     dicregatedir = target['outdir'];
     print("=== Start Testing {} ===".format(dicregatedir))
     
-    if not checkShouldnotExistFile(dicregatedir):
-        myexit(1)
-    if not checkShouldBeFiles(dicregatedir):
-        myexit(1)
+    checkShouldnotExistFile(dicregatedir)
+    checkShouldBeFiles(dicregatedir)
 
     if(DicregateTotalFileCount != getFileCount(dicregatedir)):
-        print("{} != {}".format(DicregateTotalFileCount,getFileCount(dicregatedir)))
-        myexit(1)
-    
+        myexit("{} != {}".format(DicregateTotalFileCount,getFileCount(dicregatedir)))
+
     print ("Total file count = {}".format(getFileCount(dicregatedir)))    
 
 def getVersionString(target):
@@ -243,8 +240,8 @@ def getVersionString(target):
         m = re.search(r'\d\.\d\.\d\.\d', line)
         return m.group(0)
     
-    print("Version not found.")
-    myexit(1)
+    myexit("Version not found.")
+
     
 def getMsBuildExe():
     pf = getenv("ProgramFiles");
@@ -265,9 +262,7 @@ def build(target):
     """build dicregate"""
     msbuildexe = getMsBuildExe()
     if not msbuildexe:
-        print("MSBuild.exe not found.")
-        myexit(1)
-        
+        myexit("MSBuild.exe not found.")
      
 
     args = [
@@ -283,9 +278,7 @@ def build(target):
     
 def main():
     if sys.version_info[0] < 3:
-        print("Please use python3")
-        print (sys.version)
-        myexit(1)
+        myexit("Please use python3" + sys.version)
         
     print('{} {} ({})'.format(APPNAME,VERSION,APPDISC))
     
@@ -297,8 +290,8 @@ def main():
     solutionfile = os.path.join(solutiondir, "Dicregate2013.sln")
         
     if not isfile(solutionfile):
-        print("solution file not found")
-        myexit(1)
+        myexit("solution file not found")
+
     
     targets = (
             { 
@@ -317,15 +310,18 @@ def main():
             }
     )
     verstring="";
+    
+    # build first
     for target in targets:
-        # build
         build(target)
-        # check dir
-        work(target)
+
+    # check        
+    for target in targets:
+        checkTarget(target)
         vstT = getVersionString(target)
         if(verstring and verstring != vstT):
-            print("different verstion")
-            myexit(1)
+            myexit("different is verstion in 32 and 64.")
+
         verstring = vstT
         
     #archive it
@@ -357,7 +353,8 @@ def main():
     subprocess.check_call(args)
 
         
-def myexit(retval):
+def myexit(message, retval=1):
+    print(message)
     input('Press ENTER to exit')
     exit(retval)
     
