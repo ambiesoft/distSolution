@@ -5,6 +5,7 @@ import subprocess
 import re
 from os import getenv
 import timeit
+import daver
 
 APPNAME = 'distDicregate'
 VERSION = '1.0';
@@ -352,6 +353,8 @@ def main():
     print(args)
     subprocess.check_call(args)
 
+    # upload
+    daver.dupload(archiveexe)
         
 def myexit(message, retval=1):
     print(message)
@@ -359,6 +362,7 @@ def myexit(message, retval=1):
     exit(retval)
     
 if __name__ == "__main__":
+
     start = timeit.default_timer()
     main()
     stop = timeit.default_timer()
