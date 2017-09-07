@@ -1,12 +1,16 @@
 import easywebdav
 import os
+from urllib.parse import urlparse
 
-def dupload(archive):
+def dupload(remotedir, archive):
+    
+    o = urlparse(remotedir)
+    
     # Start off by creating a client object. Username and
     # password may be omitted if no authentication is needed.
-    webdav = easywebdav.connect('ambiesoft.fam.cx') # , username='myuser', password='mypass')
+    webdav = easywebdav.connect(o.hostname) # , username='myuser', password='mypass')
     
-    updir = '/ffdav/uploads/dicregate/'
+    updir = o.path
     try:
         webdav.mkdir(updir)
     except easywebdav.client.OperationFailed:
