@@ -85,7 +85,7 @@ def getVersionString(target):
     with open(fileName, "r", encoding="utf-8") as f:
         lines = f.readlines()
         line=lines[0]
-        m = re.search(r'\d\.\d\.\d\.\d', line)
+        m = re.search(r'\d+\.\d+\.\d+\.\d+', line)
         return m.group(0)
     
     myexit("Version not found.")
@@ -204,7 +204,7 @@ def main():
 #     dirName = os.path.basename(os.path.dirname(outdir))
 
     #archive it
-    archiveexe = os.path.join(configs["archivedir"], "{}{}{}".format(configs["name"], verstring, ".exe"));
+    archiveexe = os.path.join(configs["archivedir"], "{}-{}{}".format(configs["name"], verstring, ".exe"));
     
     print("==== creating arhive {} ====".format(archiveexe))
     
@@ -233,7 +233,7 @@ def main():
     
 def myexit(message, retval=1):
     print(message)
-    input('Press ENTER to exit')
+    # input('Press ENTER to exit')
     exit(retval)
     
 if __name__ == "__main__":
@@ -243,5 +243,5 @@ if __name__ == "__main__":
     stop = timeit.default_timer()
     
     print("Succeeded ({} sec)".format(stop-start))
-    input('Press ENTER to exit')
+    # input('Press ENTER to exit')
     
