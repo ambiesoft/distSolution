@@ -13,8 +13,8 @@ import urllib.request
 import daver
 from easyhash import getSha1
 
-APPNAME = 'distDicregate'
-VERSION = '1.0';
+APPNAME = 'distSolution'
+VERSION = '1.1';
 APPDISC = 'check files and archive them'
 
 # global config
@@ -43,18 +43,19 @@ def checkShouldBeFiles(dicregatedir, shouldbe, shouldone):
             myexit(fullpath + " not exists.")
             return False
     
-    oneofthem = False
-    for f in shouldone:
-        fullpath = dicregatedir+f
-        if(isfile(fullpath)):
-            if(oneofthem):
-                myexit(fullpath + " One of them files duplicating.")
-                return False
-            oneofthem = True
-            
-    if(not oneofthem):
-        myexit("None of oneofthem files exists.")
-        return False
+    if shouldone:
+        oneofthem = False
+        for f in shouldone:
+            fullpath = dicregatedir+f
+            if(isfile(fullpath)):
+                if(oneofthem):
+                    myexit(fullpath + " One of them files duplicating.")
+                    return False
+                oneofthem = True
+                
+        if(not oneofthem):
+            myexit("None of oneofthem files exists.")
+            return False
     
     return True
             
@@ -68,27 +69,29 @@ def getFileCount(d):
 def checkTarget(target):
     global configs
     
-    dicregatedir = target['outdir'];
-    print("=== Start Testing {} ===".format(dicregatedir))
+    outdir = target['outdir'];
+    print("=== Start Testing {} ===".format(outdir))
     
-    checkShouldnotExistFile(dicregatedir,configs["ShouldNotBeFiles"])
-    checkShouldBeFiles(dicregatedir, configs["ShouldBeFiles"], configs["ShouldBeOneOfThem"])
+    checkShouldnotExistFile(outdir,configs["ShouldNotBeFiles"])
+    checkShouldBeFiles(outdir, configs["ShouldBeFiles"], configs["ShouldBeOneOfThem"])
 
-    if(configs['TotalFileCount'] != getFileCount(dicregatedir)):
-        myexit("{} != {}".format(configs['TotalFileCount'], getFileCount(dicregatedir)))
+    if(configs['TotalFileCount'] != getFileCount(outdir)):
+        myexit("{} != {}".format(configs['TotalFileCount'], getFileCount(outdir)))
 
-    print ("Total file count = {}".format(getFileCount(dicregatedir)))    
+    print ("Total file count = {}".format(getFileCount(outdir)))    
 
 def getVersionString(target):
     """get version string from history.txt"""
+    global configs
     
-    dicregatedir = target['outdir'];
+    outdir = target['outdir'];
     
-    fileName = os.path.join(dicregatedir, "history.txt")
+    fileName = os.path.join(outdir, configs["obtainverfrom"])
     with open(fileName, "r", encoding="utf-8") as f:
         lines = f.readlines()
         line=lines[0]
-        m = re.search(r'\d+\.\d+\.\d+\.\d+', line)
+        regstr = configs["obtainverregex"]
+        m = re.search(regstr, line)
         return m.group(0)
     
     myexit("Version not found.")
@@ -111,6 +114,8 @@ def getMsBuildExe():
 
 def build(solution,target):
     """build dicregate"""
+    global configs
+    
     msbuildexe = getMsBuildExe()
     if not msbuildexe:
         myexit("MSBuild.exe not found.")
@@ -119,11 +124,16 @@ def build(solution,target):
     args = [
         msbuildexe,
         solution,
-        "/t:zzzDistResource",
-        "/p:Configuration=zzzDist",
+#         "/t:zzzDistResource",
+#         "/p:Configuration=zzzDist",
         "/p:Platform={}".format(target["platform"])
     ]
-     
+    
+    if "targetproject" in configs:
+        args.append("/t:{}".format(configs["targetproject"]))
+    if "configuration" in configs:
+        args.append("/p:Configuration={}".format(configs["configuration"]))
+        
     print(args)
     subprocess.check_call(args)
 
@@ -264,6 +274,6 @@ if __name__ == "__main__":
     main()
     stop = timeit.default_timer()
     
-    print("Succeeded ({} sec)".format(stop-start))
+    print("Disribution Succeeded ({} sec)".format(stop-start))
     # input('Press ENTER to exit')
     
