@@ -205,7 +205,9 @@ def main():
 
     #archive it
     archiveexe = os.path.join(configs["archivedir"], "{}-{}{}".format(configs["name"], verstring, ".exe"));
-    
+    if isfile(archiveexe):
+        myexit('{} already exists, remove it first.'.format(archiveexe))
+        
     print("==== creating arhive {} ====".format(archiveexe))
     
 #    if(os.path.exists(archiveexe)):
