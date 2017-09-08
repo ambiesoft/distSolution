@@ -7,8 +7,11 @@ from os import getenv
 import timeit
 import glob
 import json
+import urllib.request
+
 
 import daver
+from easyhash import getSha1
 
 APPNAME = 'distDicregate'
 VERSION = '1.0';
@@ -230,16 +233,33 @@ def main():
     subprocess.check_call(args)
 
     # upload
+    print("Uploading to {}...".format(configs["remotedir"]))
     daver.dupload(configs["remotedir"], archiveexe)
     print("Uploaded to {}".format(configs["remotedir"]))
+    
+    
+    print("Compute sha1 and compare...")
+    localSha1 = getSha1(archiveexe)
+    remoteSha1Url = configs["remotedir"] + "getSha1.php?file={}".format(archiveexe)
+    remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
+    
+    if localSha1.lower() != remoteSha1.lower():
+        myexit("sha1 not equal ({} != {}".format(localSha1, remoteSha1))
+        
+    print("sha1 check succeed ({})".format(localSha1))
     
 def myexit(message, retval=1):
     print(message)
     # input('Press ENTER to exit')
     exit(retval)
     
+def codetest():
+    remoteSha1 = urllib.request.urlopen("http://ambiesoft.fam.cx/ffdav/uploads/dicregate/getSha1.php?file={}".format("Dicregate-3.1.1.11.exe")).read().decode("utf-8")
+    print(remoteSha1)
+    
 if __name__ == "__main__":
-
+    # codetest()
+    
     start = timeit.default_timer()
     main()
     stop = timeit.default_timer()
