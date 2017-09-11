@@ -36,12 +36,17 @@ def checkShouldnotExistFile(dicregatedir, shouldnot):
     
     return True
     
-def checkShouldBeFiles(dicregatedir, shouldbe, shouldone):
+def checkShouldBeFiles(dicregatedir, shouldbe):
     for f in shouldbe:
         fullpath = dicregatedir+f
         if( not (isfile(fullpath))):
             myexit(fullpath + " not exists.")
             return False
+    
+    
+    return True
+
+def checkShouldOneOfFiles(dicregatedir, shouldone):
     
     if shouldone:
         oneofthem = False
@@ -72,11 +77,17 @@ def checkTarget(target):
     outdir = target['outdir'];
     print("=== Start Testing {} ===".format(outdir))
     
-    checkShouldnotExistFile(outdir,configs["ShouldNotBeFiles"])
-    checkShouldBeFiles(outdir, configs["ShouldBeFiles"], configs["ShouldBeOneOfThem"])
+    if "ShouldNotBeFiles" in configs:
+        checkShouldnotExistFile(outdir,configs["ShouldNotBeFiles"])
+    
+    if "ShouldBeFiles" in configs:
+        checkShouldBeFiles(outdir, configs["ShouldBeFiles"])
+        
+    if "ShouldBeOneOfThem" in configs:
+        checkShouldOneOfFiles(outdir, configs["ShouldBeOneOfThem"])
 
     if(configs['TotalFileCount'] != getFileCount(outdir)):
-        myexit("{} != {}".format(configs['TotalFileCount'], getFileCount(outdir)))
+        myexit("TotalFileCount different. ({} != {})".format(configs['TotalFileCount'], getFileCount(outdir)))
 
     print ("Total file count = {}".format(getFileCount(outdir)))    
 
@@ -124,13 +135,20 @@ def build(solution,target):
     args = [
         msbuildexe,
         solution,
-#         "/t:zzzDistResource",
-#         "/p:Configuration=zzzDist",
-        "/p:Platform={}".format(target["platform"])
+#        "/t:zzzDistResource",
+#        "/p:Configuration=zzzDist",
+#        "/p:Platform={}".format(target["platform"])
     ]
     
+    if "platform" in configs:
+        args.append("/p:platform={}".format(configs["platform"]))
+ 
+    if "setoutdirforbuild" in target and target["setoutdirforbuild"]:
+        args.append('/p:outdir={}'.format(target["outdir"]))
+               
     if "targetproject" in configs:
         args.append("/t:{}".format(configs["targetproject"]))
+
     if "configuration" in configs:
         args.append("/p:Configuration={}".format(configs["configuration"]))
         
@@ -175,7 +193,7 @@ def main():
         myexit("No input file." + HELPSTRING)
     
     global configs    
-    with open(sys.argv[1]) as data_file:
+    with open(sys.argv[1],encoding="utf-8") as data_file:
         configs = json.load(data_file)
           
 
