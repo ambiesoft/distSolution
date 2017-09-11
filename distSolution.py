@@ -140,8 +140,8 @@ def build(solution,target):
 #        "/p:Platform={}".format(target["platform"])
     ]
     
-    if "platform" in configs:
-        args.append("/p:platform={}".format(configs["platform"]))
+    if "platform" in target:
+        args.append("/p:platform={}".format(target["platform"]))
  
     if "setoutdirforbuild" in target and target["setoutdirforbuild"]:
         args.append('/p:outdir={}'.format(target["outdir"]))
