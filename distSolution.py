@@ -235,21 +235,23 @@ def main():
 #     dirName = os.path.basename(os.path.dirname(outdir))
 
     #archive it
-    archiveexe = os.path.join(configs["archivedir"], "{}-{}{}".format(configs["name"], verstring, ".exe"));
-    if isfile(archiveexe):
-        myexit('{} already exists, remove it first.'.format(archiveexe))
+
+    archiveexe = "{}-{}{}".format(configs["name"], verstring, ".exe")
+    archiveexefull = os.path.join(configs["archivedir"], archiveexe)
+    if isfile(archiveexefull):
+        myexit('{} already exists, remove it first.'.format(archiveexefull))
         
-    print("==== creating arhive {} ====".format(archiveexe))
+    print("==== creating arhive {} ====".format(archiveexefull))
     
-#    if(os.path.exists(archiveexe)):
-#        print("{} already exists. Remove it first.".format(archiveexe))
+#    if(os.path.exists(archiveexefull)):
+#        print("{} already exists. Remove it first.".format(archiveexefull))
 #        myexit(1)
     
     args = [
         r"C:\LegacyPrograms\7-Zip\7z.exe",
         "a",
         "-sfx7z.sfx",
-        archiveexe,
+        archiveexefull,
     ]
     
     for t in configs['targets']:
@@ -262,13 +264,13 @@ def main():
 
     # upload
     print("Uploading to {}...".format(configs["remotedir"]))
-    daver.dupload(configs["remotedir"], archiveexe)
+    daver.dupload(configs["remotedir"], archiveexefull)
     print("Uploaded to {}".format(configs["remotedir"]))
     
     
     print("Compute sha1 and compare...")
-    localSha1 = getSha1(archiveexe)
-    remoteSha1Url = configs["remotedir"] + "getSha1.php?file={}".format(archiveexe)
+    localSha1 = getSha1(archiveexefull)
+    remoteSha1Url = configs["remotesha1"].format(archiveexe)
     remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
     
     if localSha1.lower() != remoteSha1.lower():
@@ -282,7 +284,7 @@ def myexit(message, retval=1):
     exit(retval)
     
 def codetest():
-    remoteSha1 = urllib.request.urlopen("http://ambiesoft.fam.cx/ffdav/uploads/dicregate/getSha1.php?file={}".format("Dicregate-3.1.1.11.exe")).read().decode("utf-8")
+    remoteSha1 = urllib.request.urlopen("http://ambiesoft.fam.cx/ffdav/uploads/getSha1.php?file={}".format("/test/test.txt")).read().decode("utf-8")
     print(remoteSha1)
     
 if __name__ == "__main__":
@@ -292,6 +294,12 @@ if __name__ == "__main__":
     main()
     stop = timeit.default_timer()
     
-    print("Disribution Succeeded ({} sec)".format(stop-start))
+    m, s = divmod(stop - start, 60)
+    h, m = divmod(m, 60)
+    elapsed = "%d:%02d:%02d" % (h, m, s)
+    print("Disribution Succeeded (elapsed: {})".format(elapsed))
+    
+    
+
     # input('Press ENTER to exit')
     
