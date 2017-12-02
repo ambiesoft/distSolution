@@ -107,27 +107,54 @@ def getVersionString(target):
     
     myexit("Version not found.")
 
+def getMsBuildExe2(pf, vsvar):
+    if pf:
+        if vsvar==12:
+            pf = os.path.join(pf, R"MSBuild\12.0\Bin\MSBuild.exe")
+            if isfile(pf):
+                return pf
+        elif vsvar==15:
+            pf = os.path.join(pf, R"Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe")
+            if isfile(pf):
+                return pf
+    return None 
+def getMsBuildExe(solution):
+    vsvar = 0
+    # Get VS version from solution file
+    with open(solution, "r", encoding="utf-8") as f:
+        lines=f.readlines()
+        for line in lines:
+            vsvermatch = re.search('VisualStudioVersion\\s=\\s(?P<topver>\\d+)',line)
+            if not vsvermatch:
+                continue
+            topver = int(vsvermatch.group('topver'))
+            if topver==12:
+                print ("solution is for Visual Studio 12")
+                vsvar=12
+                break
+            elif topver==15:
+                print ("solution is for Visual Studio 15")
+                vsvar=15
+                break
+                
+    if not vsvar:
+        myexit('Could not find VS version from solution')
+
+    pf = getMsBuildExe2(getenv("ProgramFiles"),vsvar)
+    if isfile(pf):
+        return pf
     
-def getMsBuildExe():
-    pf = getenv("ProgramFiles");
-    if pf:
-        pf = os.path.join(pf, R"MSBuild\12.0\Bin\MSBuild.exe")
-        if isfile(pf):
-            return pf
-        
-    pf = getenv("ProgramFiles(x86)")
-    if pf:
-        pf = os.path.join(pf, R"MSBuild\12.0\Bin\MSBuild.exe")
-        if isfile(pf):
-            return pf
-        
+    pf = getMsBuildExe2(getenv("ProgramFiles(x86)"),vsvar)      
+    if isfile(pf):
+        return pf
+
     return None
 
 def build(solution,target):
     """build dicregate"""
     global configs
     
-    msbuildexe = getMsBuildExe()
+    msbuildexe = getMsBuildExe(solution)
     if not msbuildexe:
         myexit("MSBuild.exe not found.")
      
