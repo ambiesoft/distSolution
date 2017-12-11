@@ -290,12 +290,12 @@ def main():
     subprocess.check_call(args)
 
     # upload
-    print("Uploading to {}...".format(configs["remotedir"]))
+    print("==== Uploading to {}... ====".format(configs["remotedir"]))
     daver.dupload(configs["remotedir"], archiveexefull)
     print("Uploaded to {}".format(configs["remotedir"]))
     
     
-    print("Compute sha1 and compare...")
+    print("==== Compute sha1 and compare... ====")
     localSha1 = getSha1(archiveexefull)
     remoteSha1Url = configs["remotesha1"].format(archiveexe)
     remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
@@ -306,7 +306,8 @@ def main():
     print("sha1 check succeed ({})".format(localSha1))
     
 def myexit(message, retval=1):
-    print(message)
+    
+    print('DistError: ' + message)
     # input('Press ENTER to exit')
     exit(retval)
     
@@ -324,7 +325,9 @@ if __name__ == "__main__":
     m, s = divmod(stop - start, 60)
     h, m = divmod(m, 60)
     elapsed = "%d:%02d:%02d" % (h, m, s)
-    print("Disribution Succeeded (elapsed: {})".format(elapsed))
+    
+    print()
+    print("==== Disribution Succeeded (elapsed: {}) ====".format(elapsed))
     
     
 
