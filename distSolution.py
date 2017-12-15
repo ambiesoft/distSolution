@@ -26,19 +26,19 @@ configs = {}
 
 
 
-def checkShouldnotExistFile(dicregatedir, shouldnot):
+def checkShouldnotExistFile(distDir, shouldnot):
     """ Return false if a file that should not be distributed exists. """
     for f in shouldnot:
-        fullpath = dicregatedir + f
+        fullpath = os.path.join(distDir, f)
         if isfile(fullpath) or isdir(fullpath):
             myexit(fullpath + " exists.")
             return False
     
     return True
     
-def checkShouldBeFiles(dicregatedir, shouldbe):
+def checkShouldBeFiles(distDir, shouldbe):
     for f in shouldbe:
-        fullpath = dicregatedir+f
+        fullpath = os.path.join(distDir,f)
         if( not (isfile(fullpath))):
             myexit(fullpath + " not exists.")
             return False
@@ -46,12 +46,12 @@ def checkShouldBeFiles(dicregatedir, shouldbe):
     
     return True
 
-def checkShouldOneOfFiles(dicregatedir, shouldone):
+def checkShouldOneOfFiles(distDir, shouldone):
     
     if shouldone:
         oneofthem = False
         for f in shouldone:
-            fullpath = dicregatedir+f
+            fullpath = distDir+f
             if(isfile(fullpath)):
                 if(oneofthem):
                     myexit(fullpath + " One of them files duplicating.")
@@ -117,7 +117,8 @@ def getMsBuildExe2(pf, vsvar):
             pf = os.path.join(pf, R"Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe")
             if isfile(pf):
                 return pf
-    return None 
+    return None
+ 
 def getMsBuildExe(solution):
     vsvar = 0
     # Get VS version from solution file
@@ -151,7 +152,7 @@ def getMsBuildExe(solution):
     return None
 
 def build(solution,target):
-    """build dicregate"""
+    """build target of solution"""
     global configs
     
     msbuildexe = getMsBuildExe(solution)
@@ -171,7 +172,9 @@ def build(solution,target):
         args.append("/p:platform={}".format(target["platform"]))
  
     if "setoutdirforbuild" in target and target["setoutdirforbuild"]:
-        args.append('/p:outdir={}'.format(target["outdir"]))
+        outDirBuild = target["outdir"]
+        outDirBuild = os.path.join(outDirBuild, '')  # will add the trailing slash if it's not already there.
+        args.append('/p:outdir={}'.format(outDirBuild))
                
     if "targetproject" in configs:
         args.append("/t:{}".format(configs["targetproject"]))
