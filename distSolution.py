@@ -8,7 +8,7 @@ import timeit
 import glob
 import json
 import urllib.request
-
+import time
 
 import daver
 from easyhash import getSha1
@@ -142,11 +142,11 @@ def getMsBuildExe(solution):
         myexit('Could not find VS version from solution')
 
     pf = getMsBuildExe2(getenv("ProgramFiles"),vsvar)
-    if isfile(pf):
+    if pf and isfile(pf):
         return pf
     
     pf = getMsBuildExe2(getenv("ProgramFiles(x86)"),vsvar)      
-    if isfile(pf):
+    if pf and isfile(pf):
         return pf
 
     return None
@@ -301,7 +301,14 @@ def main():
     print("==== Compute sha1 and compare... ====")
     localSha1 = getSha1(archiveexefull)
     remoteSha1Url = configs["remotesha1"].format(archiveexe)
-    remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
+
+    for loop in range(100):
+        try:
+            remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
+            break
+        except:
+            print("failed {} times to check remote Sha1. Will try again after waiting 5 seconds.".format(loop+1))
+            time.sleep(5) # wait 5 seconds
     
     if localSha1.lower() != remoteSha1.lower():
         myexit("sha1 not equal ({} != {}".format(localSha1, remoteSha1))

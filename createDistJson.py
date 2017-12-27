@@ -85,6 +85,7 @@ def main():
 
     targets=[]
     target = {}
+    target["setoutdirforbuild"]=False
     target["outdir"]= builtDir # "C:\\MyDirectory"
     target["platform"]="Win32"
     targets.append(target)

@@ -11,9 +11,9 @@
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <InterpreterId>{64698f48-747e-43d2-af7e-5ecef58de9bf}</InterpreterId>
-    <InterpreterVersion>2.7</InterpreterVersion>
-    <CommandLineArguments>C:\cygwin\home\svava\gitdev\sff\dist.json</CommandLineArguments>
+    <InterpreterId>{6ae3c5a4-c274-49ea-96cb-cc506c3973a0}</InterpreterId>
+    <InterpreterVersion>3.5</InterpreterVersion>
+    <CommandLineArguments>C:\cygwin\home\wataq\gitdev\distSample\dist.json</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
@@ -36,7 +36,7 @@
     <Folder Include="easywebdav" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="{64698f48-747e-43d2-af7e-5ecef58de9bf}\2.7" />
+    <InterpreterReference Include="{6ae3c5a4-c274-49ea-96cb-cc506c3973a0}\3.5" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
