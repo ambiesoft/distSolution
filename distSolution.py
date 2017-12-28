@@ -284,8 +284,14 @@ def main():
         archiveexefull,
     ]
     
+    
+    # no duplicate in args
+    addedtarget=[]
     for t in configs['targets']:
-        args.append(t['outdir'])
+        outdir = t['outdir']
+        if outdir not in addedtarget:
+            args.append(outdir)
+        addedtarget.append(outdir)
         
     args.append("-mx9");
     
