@@ -223,6 +223,7 @@ def main():
         myexit("No input file." + HELPSTRING)
     
     global configs    
+    print("Opening input {}".format(sys.argv[1]))
     with open(sys.argv[1],encoding="utf-8") as data_file:
         configs = json.load(data_file)
           
