@@ -112,6 +112,14 @@ def getBuildToolsBinDir():
         myexit("Qt not found")
 
     return ret
+
+def copyQtFile(distdir, distsubdir, qtdir, qtfile):
+    d = os.path.join(distdir, distsubdir)
+    ensureDir(d)
+    dll = os.path.join(qtdir,qtfile)
+    if not os.path.isfile(dll):
+        myexit('{} not found.'.format(dll))
+    copyfile(dll, os.path.join(d,qtfile))
     
 def main():
     parser = ArgumentParser(
@@ -193,24 +201,10 @@ def main():
     print(args)
     subprocess.check_call(args)
 
-
-    distplatformsdir = os.path.join(distdir, 'platforms')
-    ensureDir(distplatformsdir)
-    qwindowsdll = os.path.join(getQtPluginPlatformDir(),'qwindows.dll')
-    if not os.path.isfile(qwindowsdll):
-        myexit('qwindows.dll not found.')
-    copyfile(qwindowsdll, os.path.join(distplatformsdir,'qwindows.dll'))
-
+    copyQtFile(distdir, 'platforms', getQtPluginPlatformDir(),'qwindows.dll')
+    copyQtFile(distdir, 'sqldrivers', getQtPluginSqldriversDir(), 'qsqlite.dll')
     
-    # copy sql driver
-    distsqldriversdir = os.path.join(distdir, 'sqldrivers')
-    ensureDir(distsqldriversdir)
-    
-    qsqlitedll = os.path.join(getQtPluginSqldriversDir(), 'qsqlite.dll')
-    if not os.path.isfile(qsqlitedll):
-        myexit('qsqlite.dll not found.')
-    copyfile(qsqlitedll, os.path.join(distsqldriversdir,'qsqlite.dll'))
-        
+       
 
     copyfile(releaseexe, os.path.join(distdir,'SceneExplorer.exe'))
     
