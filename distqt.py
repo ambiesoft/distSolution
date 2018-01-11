@@ -14,7 +14,7 @@ def myexit(message):
 
 def getQt():
     qtdirs = [
-        "Y:\\local\\Qt",
+        "Y:\\G\\Qt",
         "C:\\local\\Qt",
     ]
     qtdir = ""
@@ -99,11 +99,13 @@ def ensureDir(dir):
 
 def getBuildToolsBinDir():
     cand = [
-        "C:\\local\\Qt\\Tools\\mingw530_32\\bin",
-        "Y:\\local\\Qt\\Tools\\mingw530_32\\bin",
+        "Tools\\mingw530_32\\bin",
     ];
+    qt = getQt();
+    
     ret = ""
     for t in cand:
+        t = os.path.join(qt,t)
         if os.path.isdir(t):
             ret=t
             break
@@ -119,7 +121,10 @@ def copyQtFile(distdir, distsubdir, qtdir, qtfile):
     dll = os.path.join(qtdir,qtfile)
     if not os.path.isfile(dll):
         myexit('{} not found.'.format(dll))
-    copyfile(dll, os.path.join(d,qtfile))
+    
+    dest = os.path.join(d, qtfile)
+    copyfile(dll, dest)
+    print('copied: {0} => {1}'.format(dll,dest))
     
 def main():
     parser = ArgumentParser(
@@ -205,9 +210,10 @@ def main():
     copyQtFile(distdir, 'sqldrivers', getQtPluginSqldriversDir(), 'qsqlite.dll')
     
        
+    dest = os.path.join(distdir,'SceneExplorer.exe')
+    copyfile(releaseexe, dest)
+    print('copied: {0} => {1}'.format(releaseexe,dest))
 
-    copyfile(releaseexe, os.path.join(distdir,'SceneExplorer.exe'))
-    
 if __name__ == "__main__":
     # codetest()
 
