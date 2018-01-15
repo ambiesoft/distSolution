@@ -291,7 +291,8 @@ def main():
     for t in configs['targets']:
         outdir = t['outdir']
         if outdir not in addedtarget:
-            args.append(outdir)
+            outdirfull = os.path.abspath(outdir)
+            args.append(outdirfull)
         addedtarget.append(outdir)
         
     args.append("-mx9");
