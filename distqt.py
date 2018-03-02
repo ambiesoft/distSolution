@@ -61,7 +61,14 @@ def getDeployTool(qtroot):
 
     return qmake
 
+def getLreleaseTool(qtroot):
+    dir = getQtToolBinDir(qtroot)
+    qmake = os.path.join(dir, "lrelease.exe")
+    if not os.path.isfile(qmake):
+        myexit("{} is not found.".format(qmake))
 
+    return qmake
+    
 def getQtPluginDir(qtroot):
     # qtDirs = getQt()
     q = os.path.join(qtroot,QTVER)
@@ -225,6 +232,16 @@ def main():
 
 
 
+    # compile translation
+    srctsfiles = glob.iglob(os.path.join('../src/translations', "*.ts"))
+    for file in srctsfiles:
+        if os.path.isfile(file):
+            args = []
+            args.append(getLreleaseTool(qtroot))
+            args.append(file)
+            print(args)
+            subprocess.check_call(args)
+    
     # translation
     disttransdir = os.path.join(distdir, "translations")
     ensureDir(disttransdir)
