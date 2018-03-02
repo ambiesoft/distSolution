@@ -4,6 +4,7 @@ import timeit
 import subprocess
 from shutil import copyfile
 from argparse import ArgumentParser
+import glob, shutil
 
 QTVER='5.10.0'
 TOOL='mingw53_32'
@@ -12,7 +13,7 @@ def myexit(message):
     print(message)
     exit(1)
 
-def getQt():
+def getQt_obsolete():
     qtdirs = [
         "Y:\\G\\Qt",
         "C:\\local\\Qt",
@@ -28,9 +29,9 @@ def getQt():
 
     return qtdir
 
-def getQtToolBinDir():
-    qtDirs = getQt()
-    q = os.path.join(qtDirs,QTVER)
+def getQtToolBinDir(qtroot):
+    # qtDirs = getQt()
+    q = os.path.join(qtroot,QTVER)
     if not os.path.isdir(q):
         myexit("{} is not found.".format(q))
     q = os.path.join(q, TOOL)
@@ -42,8 +43,8 @@ def getQtToolBinDir():
 
     return q
 
-def getQmake():
-    dir =getQtToolBinDir()
+def getQmake(qtroot):
+    dir =getQtToolBinDir(qtroot)
 
     qmake = os.path.join(dir, "qmake.exe")
     if not os.path.isfile(qmake):
@@ -51,8 +52,8 @@ def getQmake():
 
     return qmake
 
-def getDeployTool():
-    dir =getQtToolBinDir()
+def getDeployTool(qtroot):
+    dir =getQtToolBinDir(qtroot)
 
     qmake = os.path.join(dir, "windeployqt.exe")
     if not os.path.isfile(qmake):
@@ -61,9 +62,9 @@ def getDeployTool():
     return qmake
 
 
-def getQtPluginDir():
-    qtDirs = getQt()
-    q = os.path.join(qtDirs,QTVER)
+def getQtPluginDir(qtroot):
+    # qtDirs = getQt()
+    q = os.path.join(qtroot,QTVER)
     if not os.path.isdir(q):
         myexit("{} is not found.".format(q))
     q = os.path.join(q, TOOL)
@@ -75,16 +76,16 @@ def getQtPluginDir():
         
     return q;
     
-def getQtPluginPlatformDir():
-    q = getQtPluginDir()
+def getQtPluginPlatformDir(qtroot):
+    q = getQtPluginDir(qtroot)
     q = os.path.join(q, "platforms")
     if not os.path.isdir(q):
         myexit("{} is not found.".format(q))
 
     return q
 
-def getQtPluginSqldriversDir():
-    q = getQtPluginDir()
+def getQtPluginSqldriversDir(qtroot):
+    q = getQtPluginDir(qtroot)
     q = os.path.join(q, "sqldrivers")
     if not os.path.isdir(q):
         myexit("{} is not found.".format(q))
@@ -97,15 +98,15 @@ def ensureDir(dir):
         if not os.path.isdir(dir):
             myexit('Could not create {}'.format(dir))
 
-def getBuildToolsBinDir():
+def getBuildToolsBinDir(qtroot):
     cand = [
         "Tools\\mingw530_32\\bin",
     ];
-    qt = getQt();
+    # qt = getQt();
     
     ret = ""
     for t in cand:
-        t = os.path.join(qt,t)
+        t = os.path.join(qtroot,t)
         if os.path.isdir(t):
             ret=t
             break
@@ -140,6 +141,12 @@ def main():
         "profile",
         nargs='?'
         )
+    parser.add_argument(
+        "-qtroot",
+        nargs='?',
+        action="store",
+        help="Qt root directory.")
+    
     
     args = parser.parse_args()
     if args.C:
@@ -159,7 +166,9 @@ def main():
         if not os.path.isdir("build"):
             myexit("Could not create dir [build]")
 
-    toolbin = getBuildToolsBinDir()
+    qtroot = args.qtroot
+    
+    toolbin = getBuildToolsBinDir(qtroot)
     my_env = os.environ.copy()
     my_env["PATH"] = toolbin + os.pathsep + my_env["PATH"]
     os.environ['PATH']=my_env['PATH']
@@ -169,7 +178,7 @@ def main():
     print("Entered directory {}".format(os.getcwd()))
 
     print("==== creating Makefile ====")
-    qmake = getQmake()
+    qmake = getQmake(qtroot)
 
     args = []
     args.append(qmake)
@@ -191,7 +200,7 @@ def main():
 
     print("==== deploying ====")
     args=[]
-    deploytool = getDeployTool()
+    deploytool = getDeployTool(qtroot)
     releaseexe = "release/SceneExplorer.exe"
     if not os.path.isfile(releaseexe):
         myexit("Release exe {} not found.".format(releaseexe))
@@ -206,14 +215,29 @@ def main():
     print(args)
     subprocess.check_call(args)
 
-    copyQtFile(distdir, 'platforms', getQtPluginPlatformDir(),'qwindows.dll')
-    copyQtFile(distdir, 'sqldrivers', getQtPluginSqldriversDir(), 'qsqlite.dll')
+    copyQtFile(distdir, 'platforms', getQtPluginPlatformDir(qtroot),'qwindows.dll')
+    copyQtFile(distdir, 'sqldrivers', getQtPluginSqldriversDir(qtroot), 'qsqlite.dll')
     
        
     dest = os.path.join(distdir,'SceneExplorer.exe')
     copyfile(releaseexe, dest)
     print('copied: {0} => {1}'.format(releaseexe,dest))
 
+
+
+    # translation
+    disttransdir = os.path.join(distdir, "translations")
+    ensureDir(disttransdir)
+    
+    srcdistfiles = glob.iglob(os.path.join('../src/translations', "*.qm"))
+    for file in srcdistfiles:
+        if os.path.isfile(file):
+            shutil.copy2(file, disttransdir)
+            
+    
+    
+    
+    
 if __name__ == "__main__":
     # codetest()
 
