@@ -229,24 +229,23 @@ def main():
 
 
 
-    # compile translation
-    srctsfiles = glob.iglob(os.path.join('../src/translations', "*.ts"))
-    for file in srctsfiles:
-        if os.path.isfile(file):
-            args = []
-            args.append(getLreleaseTool(qtroot))
-            args.append(file)
-            print(args)
-            subprocess.check_call(args)
+    # compile translation-- obsolete ( done in qmake and embedded in resource
+    #srctsfiles = glob.iglob(os.path.join('../src/translations', "*.ts"))
+    #for file in srctsfiles:
+    #    if os.path.isfile(file):
+    #        args = []
+    #        args.append(getLreleaseTool(qtroot))
+    #        args.append(file)
+    #        print(args)
+    #        subprocess.check_call(args)
     
-    # translation
-    disttransdir = os.path.join(distdir, "translations")
-    ensureDir(disttransdir)
-    
-    srcdistfiles = glob.iglob(os.path.join('../src/translations', "*.qm"))
-    for file in srcdistfiles:
-        if os.path.isfile(file):
-            shutil.copy2(file, disttransdir)
+    # disttransdir = os.path.join(distdir, "translations")
+    # ensureDir(disttransdir)
+    #
+    #srcdistfiles = glob.iglob(os.path.join('../src/translations', "*.qm"))
+    #for file in srcdistfiles:
+    #    if os.path.isfile(file):
+    #        shutil.copy2(file, disttransdir)
             
     
     
