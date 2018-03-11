@@ -5,15 +5,15 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{d8d94c7b-4ec9-4782-91e0-ea0e1102ff5e}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>distSolution.py</StartupFile>
+    <StartupFile>distqt.py</StartupFile>
     <SearchPath />
-    <WorkingDirectory>C:\cygwin\home\safvw\gitdev\Dicregate\trunk\Dicregate\</WorkingDirectory>
+    <WorkingDirectory>C:\cygwin\home\safvw\gitdev\SceneExplorer</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId>{d4834009-075d-48b3-b020-c6aff1ffde31}</InterpreterId>
     <InterpreterVersion>2.7</InterpreterVersion>
-    <CommandLineArguments>C:\cygwin\home\safvw\gitdev\Dicregate\trunk\Dicregate\dist.json</CommandLineArguments>
+    <CommandLineArguments>src\SceneExplorer.pro -qtroot C:\local\Qt</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
@@ -26,6 +26,7 @@
   <ItemGroup>
     <Compile Include="createDistJson.py" />
     <Compile Include="daver.py" />
+    <Compile Include="distqt.py" />
     <Compile Include="distSolution.py" />
     <Compile Include="easyhash.py" />
     <Compile Include="easywebdav\client.py" />

@@ -148,7 +148,7 @@ def main():
         myexit("project file *.pro must be specified.")
     if not os.path.isfile(pro):
         myexit("{} is not a file.".format(pro))
-        
+
     if not os.path.isabs(pro):
         pro = os.path.join('../', pro)
         
@@ -190,6 +190,10 @@ def main():
     print(args)
     subprocess.check_call(args)
 
+    # print("==== Check version ====")
+    distdir = "C:\\Linkout\\SceneExplorer\\"
+    ensureDir(distdir)
+
     print("==== deploying ====")
     args = []
     deploytool = qtTools.deployTool()  # getDeployTool(qtroot)
@@ -197,8 +201,6 @@ def main():
     if not os.path.isfile(releaseexe):
         myexit("Release exe {} not found.".format(releaseexe))
 
-    distdir = "C:\\Linkout\\SceneExplorer\\"
-    ensureDir(distdir)
 
     args.append(deploytool)
     args.append(releaseexe)
