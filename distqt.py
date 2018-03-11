@@ -6,98 +6,107 @@ from shutil import copyfile
 from argparse import ArgumentParser
 import glob, shutil
 
-QTVER='5.10.0'
-TOOL='mingw53_32'
+class QtTools:
+	def __init__(self, qtVer, qtRoot, qtTool, qtBuildTool):
+		self.qtVer = qtVer
+		self.qtRoot = qtRoot
+		self.qtTool = qtTool
+		self.qtBuildTool = qtBuildTool
+
+	def binDir(self):
+		q = os.path.join(self.qtRoot, self.qtVer)
+		if not os.path.isdir(q):
+			myexit("{} is not found.".format(q))
+		q = os.path.join(q, self.qtTool)
+		if not os.path.isdir(q):
+			myexit("{} is not found.".format(q))
+		q = os.path.join(q, "bin")
+		if not os.path.isdir(q):
+			myexit("{} is not found.".format(q))
+
+		return q
+
+	def buildBinDir(self):
+		#cand = [
+		#    "Tools\\mingw530_32\\bin",
+		#];
+		# qt = getQt();
+
+		ret = os.path.join(self.qtRoot, 'Tools', self.qtBuildTool, 'bin')
+		if not os.path.isdir(ret):
+			myexit("{} is not directory.".format(ret))
+
+		return ret
+
+	def qmake(self):
+		dir = self.binDir()
+		qmake = os.path.join(dir, "qmake.exe")
+		if not os.path.isfile(qmake):
+			myexit("{} is not found.".format(qmake))
+
+		return qmake
+
+
+	def deployTool(self):
+		dir = self.binDir()
+
+		windeployqt = os.path.join(dir, "windeployqt.exe")
+		if not os.path.isfile(windeployqt):
+			myexit("{} is not found.".format(windeployqt))
+
+		return windeployqt
+	
+
+
+	def pluginDir(self):
+		q = os.path.join(self.qtRoot,self.qtVer)
+		if not os.path.isdir(q):
+			myexit("{} is not found.".format(q))
+		q = os.path.join(q, self.qtTool)
+		if not os.path.isdir(q):
+			myexit("{} is not found.".format(q))
+		q = os.path.join(q, "plugins")
+		if not os.path.isdir(q):
+			myexit("{} is not found.".format(q))
+
+		return q;
+
+	def pluginPlatformDir(self):
+		q = self.pluginDir()
+		q = os.path.join(q, "platforms")
+		if not os.path.isdir(q):
+			myexit("{} is not found.".format(q))
+
+		return q
+
+
+	def pluginSqldriversDir(self):
+		q = self.pluginDir()
+		q = os.path.join(q, "sqldrivers")
+		if not os.path.isdir(q):
+			myexit("{} is not found.".format(q))
+
+		return q
 
 def myexit(message):
     print(message)
     exit(1)
 
-def getQt_obsolete():
-    qtdirs = [
-        "Y:\\G\\Qt",
-        "C:\\local\\Qt",
-    ]
-    qtdir = ""
-    for t in qtdirs:
-        if os.path.isdir(t):
-            qtdir=t
-            break
 
-    if not qtdir:
-        myexit("Qt not found")
 
-    return qtdir
 
-def getQtToolBinDir(qtroot):
-    # qtDirs = getQt()
-    q = os.path.join(qtroot,QTVER)
-    if not os.path.isdir(q):
-        myexit("{} is not found.".format(q))
-    q = os.path.join(q, TOOL)
-    if not os.path.isdir(q):
-        myexit("{} is not found.".format(q))
-    q = os.path.join(q, "bin")
-    if not os.path.isdir(q):
-        myexit("{} is not found.".format(q))
 
-    return q
+#def getLreleaseTool(qtroot):
+#    dir = getQtToolBinDir(qtroot)
+#    qmake = os.path.join(dir, "lrelease.exe")
+#    if not os.path.isfile(qmake):
+#        myexit("{} is not found.".format(qmake))
 
-def getQmake(qtroot):
-    dir =getQtToolBinDir(qtroot)
-
-    qmake = os.path.join(dir, "qmake.exe")
-    if not os.path.isfile(qmake):
-        myexit("{} is not found.".format(qmake))
-
-    return qmake
-
-def getDeployTool(qtroot):
-    dir =getQtToolBinDir(qtroot)
-
-    qmake = os.path.join(dir, "windeployqt.exe")
-    if not os.path.isfile(qmake):
-        myexit("{} is not found.".format(qmake))
-
-    return qmake
-
-def getLreleaseTool(qtroot):
-    dir = getQtToolBinDir(qtroot)
-    qmake = os.path.join(dir, "lrelease.exe")
-    if not os.path.isfile(qmake):
-        myexit("{} is not found.".format(qmake))
-
-    return qmake
+#    return qmake
     
-def getQtPluginDir(qtroot):
-    # qtDirs = getQt()
-    q = os.path.join(qtroot,QTVER)
-    if not os.path.isdir(q):
-        myexit("{} is not found.".format(q))
-    q = os.path.join(q, TOOL)
-    if not os.path.isdir(q):
-        myexit("{} is not found.".format(q))
-    q = os.path.join(q, "plugins")
-    if not os.path.isdir(q):
-        myexit("{} is not found.".format(q))
-        
-    return q;
-    
-def getQtPluginPlatformDir(qtroot):
-    q = getQtPluginDir(qtroot)
-    q = os.path.join(q, "platforms")
-    if not os.path.isdir(q):
-        myexit("{} is not found.".format(q))
 
-    return q
 
-def getQtPluginSqldriversDir(qtroot):
-    q = getQtPluginDir(qtroot)
-    q = os.path.join(q, "sqldrivers")
-    if not os.path.isdir(q):
-        myexit("{} is not found.".format(q))
 
-    return q
 
 def ensureDir(dir):
     if not os.path.isdir(dir):
@@ -105,23 +114,6 @@ def ensureDir(dir):
         if not os.path.isdir(dir):
             myexit('Could not create {}'.format(dir))
 
-def getBuildToolsBinDir(qtroot):
-    cand = [
-        "Tools\\mingw530_32\\bin",
-    ];
-    # qt = getQt();
-    
-    ret = ""
-    for t in cand:
-        t = os.path.join(qtroot,t)
-        if os.path.isdir(t):
-            ret=t
-            break
-
-    if not ret:
-        myexit("Qt not found")
-
-    return ret
 
 def copyQtFile(distdir, distsubdir, qtdir, qtfile):
     d = os.path.join(distdir, distsubdir)
@@ -174,18 +166,21 @@ def main():
             myexit("Could not create dir [build]")
 
     qtroot = args.qtroot
-    
-    toolbin = getBuildToolsBinDir(qtroot)
+
+    qtTools = QtTools('5.10.0', qtroot, 'mingw53_32', 'mingw530_32')
+
+    buildtoolbin = qtTools.buildBinDir()
+
     my_env = os.environ.copy()
-    my_env["PATH"] = toolbin + os.pathsep + my_env["PATH"]
+    my_env["PATH"] = buildtoolbin + os.pathsep + my_env["PATH"]
     os.environ['PATH']=my_env['PATH']
-    print("{} is added to path.".format(toolbin))
+    print("{} is added to path.".format(buildtoolbin))
 
     os.chdir("build")
     print("Entered directory {}".format(os.getcwd()))
 
     print("==== creating Makefile ====")
-    qmake = getQmake(qtroot)
+    qmake = qtTools.qmake() # getQmake(qtroot)
 
     args = []
     args.append(qmake)
@@ -207,7 +202,7 @@ def main():
 
     print("==== deploying ====")
     args=[]
-    deploytool = getDeployTool(qtroot)
+    deploytool = qtTools.deployTool() # getDeployTool(qtroot)
     releaseexe = "release/SceneExplorer.exe"
     if not os.path.isfile(releaseexe):
         myexit("Release exe {} not found.".format(releaseexe))
@@ -222,8 +217,10 @@ def main():
     print(args)
     subprocess.check_call(args)
 
-    copyQtFile(distdir, 'platforms', getQtPluginPlatformDir(qtroot),'qwindows.dll')
-    copyQtFile(distdir, 'sqldrivers', getQtPluginSqldriversDir(qtroot), 'qsqlite.dll')
+    # copyQtFile(distdir, 'platforms', getQtPluginPlatformDir(qtroot),'qwindows.dll')
+    copyQtFile(distdir, 'platforms', qtTools.pluginPlatformDir(),'qwindows.dll')
+    # copyQtFile(distdir, 'sqldrivers', getQtPluginSqldriversDir(qtroot), 'qsqlite.dll')
+    copyQtFile(distdir, 'sqldrivers', qtTools.pluginSqldriversDir(), 'qsqlite.dll')
     
        
     dest = os.path.join(distdir,'SceneExplorer.exe')
