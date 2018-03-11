@@ -6,106 +6,98 @@ from shutil import copyfile
 from argparse import ArgumentParser
 import glob, shutil
 
+
 class QtTools:
-	def __init__(self, qtVer, qtRoot, qtTool, qtBuildTool):
-		self.qtVer = qtVer
-		self.qtRoot = qtRoot
-		self.qtTool = qtTool
-		self.qtBuildTool = qtBuildTool
 
-	def binDir(self):
-		q = os.path.join(self.qtRoot, self.qtVer)
-		if not os.path.isdir(q):
-			myexit("{} is not found.".format(q))
-		q = os.path.join(q, self.qtTool)
-		if not os.path.isdir(q):
-			myexit("{} is not found.".format(q))
-		q = os.path.join(q, "bin")
-		if not os.path.isdir(q):
-			myexit("{} is not found.".format(q))
+    def __init__(self, qtVer, qtRoot, qtTool, qtBuildTool):
+        self.qtVer = qtVer
+        self.qtRoot = qtRoot
+        self.qtTool = qtTool
+        self.qtBuildTool = qtBuildTool
 
-		return q
+    def binDir(self):
+        q = os.path.join(self.qtRoot, self.qtVer)
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
+        q = os.path.join(q, self.qtTool)
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
+        q = os.path.join(q, "bin")
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
 
-	def buildBinDir(self):
-		#cand = [
-		#    "Tools\\mingw530_32\\bin",
-		#];
-		# qt = getQt();
+        return q
 
-		ret = os.path.join(self.qtRoot, 'Tools', self.qtBuildTool, 'bin')
-		if not os.path.isdir(ret):
-			myexit("{} is not directory.".format(ret))
+    def buildBinDir(self):
+        # cand = [
+        #    "Tools\\mingw530_32\\bin",
+        # ];
+        # qt = getQt();
 
-		return ret
+        ret = os.path.join(self.qtRoot, 'Tools', self.qtBuildTool, 'bin')
+        if not os.path.isdir(ret):
+            myexit("{} is not directory.".format(ret))
 
-	def qmake(self):
-		dir = self.binDir()
-		qmake = os.path.join(dir, "qmake.exe")
-		if not os.path.isfile(qmake):
-			myexit("{} is not found.".format(qmake))
+        return ret
 
-		return qmake
+    def qmake(self):
+        dir = self.binDir()
+        qmake = os.path.join(dir, "qmake.exe")
+        if not os.path.isfile(qmake):
+            myexit("{} is not found.".format(qmake))
 
+        return qmake
 
-	def deployTool(self):
-		dir = self.binDir()
+    def deployTool(self):
+        dir = self.binDir()
 
-		windeployqt = os.path.join(dir, "windeployqt.exe")
-		if not os.path.isfile(windeployqt):
-			myexit("{} is not found.".format(windeployqt))
+        windeployqt = os.path.join(dir, "windeployqt.exe")
+        if not os.path.isfile(windeployqt):
+            myexit("{} is not found.".format(windeployqt))
 
-		return windeployqt
-	
+        return windeployqt
 
+    def pluginDir(self):
+        q = os.path.join(self.qtRoot, self.qtVer)
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
+        q = os.path.join(q, self.qtTool)
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
+        q = os.path.join(q, "plugins")
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
 
-	def pluginDir(self):
-		q = os.path.join(self.qtRoot,self.qtVer)
-		if not os.path.isdir(q):
-			myexit("{} is not found.".format(q))
-		q = os.path.join(q, self.qtTool)
-		if not os.path.isdir(q):
-			myexit("{} is not found.".format(q))
-		q = os.path.join(q, "plugins")
-		if not os.path.isdir(q):
-			myexit("{} is not found.".format(q))
+        return q;
 
-		return q;
+    def pluginPlatformDir(self):
+        q = self.pluginDir()
+        q = os.path.join(q, "platforms")
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
 
-	def pluginPlatformDir(self):
-		q = self.pluginDir()
-		q = os.path.join(q, "platforms")
-		if not os.path.isdir(q):
-			myexit("{} is not found.".format(q))
+        return q
 
-		return q
+    def pluginSqldriversDir(self):
+        q = self.pluginDir()
+        q = os.path.join(q, "sqldrivers")
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
 
+        return q
 
-	def pluginSqldriversDir(self):
-		q = self.pluginDir()
-		q = os.path.join(q, "sqldrivers")
-		if not os.path.isdir(q):
-			myexit("{} is not found.".format(q))
-
-		return q
 
 def myexit(message):
     print(message)
     exit(1)
 
-
-
-
-
-#def getLreleaseTool(qtroot):
+# def getLreleaseTool(qtroot):
 #    dir = getQtToolBinDir(qtroot)
 #    qmake = os.path.join(dir, "lrelease.exe")
 #    if not os.path.isfile(qmake):
 #        myexit("{} is not found.".format(qmake))
 
 #    return qmake
-    
-
-
 
 
 def ensureDir(dir):
@@ -118,13 +110,14 @@ def ensureDir(dir):
 def copyQtFile(distdir, distsubdir, qtdir, qtfile):
     d = os.path.join(distdir, distsubdir)
     ensureDir(d)
-    dll = os.path.join(qtdir,qtfile)
+    dll = os.path.join(qtdir, qtfile)
     if not os.path.isfile(dll):
         myexit('{} not found.'.format(dll))
     
     dest = os.path.join(d, qtfile)
     copyfile(dll, dest)
-    print('copied: {0} => {1}'.format(dll,dest))
+    print('copied: {0} => {1}'.format(dll, dest))
+
     
 def main():
     parser = ArgumentParser(
@@ -145,7 +138,6 @@ def main():
         nargs='?',
         action="store",
         help="Qt root directory.")
-    
     
     args = parser.parse_args()
     if args.C:
@@ -173,14 +165,14 @@ def main():
 
     my_env = os.environ.copy()
     my_env["PATH"] = buildtoolbin + os.pathsep + my_env["PATH"]
-    os.environ['PATH']=my_env['PATH']
+    os.environ['PATH'] = my_env['PATH']
     print("{} is added to path.".format(buildtoolbin))
 
     os.chdir("build")
     print("Entered directory {}".format(os.getcwd()))
 
     print("==== creating Makefile ====")
-    qmake = qtTools.qmake() # getQmake(qtroot)
+    qmake = qtTools.qmake()  # getQmake(qtroot)
 
     args = []
     args.append(qmake)
@@ -189,25 +181,23 @@ def main():
     print(args)
     subprocess.check_call(args)
 
-
     print("==== make ====")
     make = "mingw32-make.exe"
 
-    args=[]
+    args = []
     args.append(make)
 
     print(args)
     subprocess.check_call(args)
 
-
     print("==== deploying ====")
-    args=[]
-    deploytool = qtTools.deployTool() # getDeployTool(qtroot)
+    args = []
+    deploytool = qtTools.deployTool()  # getDeployTool(qtroot)
     releaseexe = "release/SceneExplorer.exe"
     if not os.path.isfile(releaseexe):
         myexit("Release exe {} not found.".format(releaseexe))
 
-    distdir="C:\\Linkout\\SceneExplorer\\"
+    distdir = "C:\\Linkout\\SceneExplorer\\"
     ensureDir(distdir)
 
     args.append(deploytool)
@@ -218,20 +208,17 @@ def main():
     subprocess.check_call(args)
 
     # copyQtFile(distdir, 'platforms', getQtPluginPlatformDir(qtroot),'qwindows.dll')
-    copyQtFile(distdir, 'platforms', qtTools.pluginPlatformDir(),'qwindows.dll')
+    copyQtFile(distdir, 'platforms', qtTools.pluginPlatformDir(), 'qwindows.dll')
     # copyQtFile(distdir, 'sqldrivers', getQtPluginSqldriversDir(qtroot), 'qsqlite.dll')
     copyQtFile(distdir, 'sqldrivers', qtTools.pluginSqldriversDir(), 'qsqlite.dll')
-    
        
-    dest = os.path.join(distdir,'SceneExplorer.exe')
+    dest = os.path.join(distdir, 'SceneExplorer.exe')
     copyfile(releaseexe, dest)
-    print('copied: {0} => {1}'.format(releaseexe,dest))
-
-
+    print('copied: {0} => {1}'.format(releaseexe, dest))
 
     # compile translation-- obsolete ( done in qmake and embedded in resource
-    #srctsfiles = glob.iglob(os.path.join('../src/translations', "*.ts"))
-    #for file in srctsfiles:
+    # srctsfiles = glob.iglob(os.path.join('../src/translations', "*.ts"))
+    # for file in srctsfiles:
     #    if os.path.isfile(file):
     #        args = []
     #        args.append(getLreleaseTool(qtroot))
@@ -242,13 +229,10 @@ def main():
     # disttransdir = os.path.join(distdir, "translations")
     # ensureDir(disttransdir)
     #
-    #srcdistfiles = glob.iglob(os.path.join('../src/translations', "*.qm"))
-    #for file in srcdistfiles:
+    # srcdistfiles = glob.iglob(os.path.join('../src/translations', "*.qm"))
+    # for file in srcdistfiles:
     #    if os.path.isfile(file):
     #        shutil.copy2(file, disttransdir)
-            
-    
-    
     
     
 if __name__ == "__main__":
@@ -264,4 +248,3 @@ if __name__ == "__main__":
 
     print()
     print("==== Disribution Succeeded (elapsed: {}) ====".format(elapsed))
-
