@@ -10,3 +10,5 @@ distSolution2013.v12.suo
 .pydevproject
 /__pycache__/
 *.pyc
+
+.vs/
