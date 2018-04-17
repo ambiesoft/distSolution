@@ -135,9 +135,25 @@ def main():
         )
     parser.add_argument(
         "-qtroot",
-        nargs='?',
+        nargs=1,
         action="store",
+        type=str,
         help="Qt root directory.")
+    parser.add_argument(
+        "-qtversion",
+        nargs=1,
+        action='store',
+        help="Qt Version (like 5.10.1)")
+    parser.add_argument(
+        "-qtversiontools",
+        nargs=1,
+        action='store',
+        help="Qt Version-tools (like mingw53_32)")
+    parser.add_argument(
+        "-qttools",
+        nargs=1,
+        action='store',
+        help="Qt Tools (like mingw530_32)")
     
     args = parser.parse_args()
     if args.C:
@@ -157,9 +173,9 @@ def main():
         if not os.path.isdir("build"):
             myexit("Could not create dir [build]")
 
-    qtroot = args.qtroot
+    
 
-    qtTools = QtTools('5.10.0', qtroot, 'mingw53_32', 'mingw530_32')
+    qtTools = QtTools(args.qtversion[0], args.qtroot[0], args.qtversiontools[0], args.qttools[0])
 
     buildtoolbin = qtTools.buildBinDir()
 
