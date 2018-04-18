@@ -230,20 +230,6 @@ def main():
 
     solutionFile = os.path.join(os.path.dirname(sys.argv[1]), configs["solution"])
     
-#     targets = (
-#             { 
-#                 "solutionfile":solutionFile,
-#                 "outdir" : R"C:/Linkout/Dicregate/",
-#                 "platform":"Win32"
-#             },
-# 
-#               
-#             {
-#                 "solutionfile":solutionFile,
-#                 "outdir" : R"C:/Linkout/Dicregate64/",
-#                 "platform":"x64"
-#             }
-#     )
     verstring="";
     
     # build first

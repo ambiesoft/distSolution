@@ -5,7 +5,8 @@ import subprocess
 from shutil import copyfile
 from argparse import ArgumentParser
 import glob, shutil
-
+import json
+from common import *
 
 class QtTools:
 
@@ -87,6 +88,9 @@ class QtTools:
         return q
 
 
+                
+                
+                
 def myexit(message):
     print(message)
     exit(1)
@@ -154,6 +158,11 @@ def main():
         nargs=1,
         action='store',
         help="Qt Tools (like mingw530_32)")
+    parser.add_argument(
+        "-distfile",
+        nargs=1,
+        action='store',
+        help="distfile")
     
     args = parser.parse_args()
     if args.C:
@@ -174,9 +183,12 @@ def main():
             myexit("Could not create dir [build]")
 
     
-
+    distdir = "C:\\Linkout\\SceneExplorer\\"
+    
     qtTools = QtTools(args.qtversion[0], args.qtroot[0], args.qtversiontools[0], args.qttools[0])
+    distconfig = DistConfig(args.distfile[0])
 
+    
     buildtoolbin = qtTools.buildBinDir()
 
     my_env = os.environ.copy()
@@ -207,7 +219,7 @@ def main():
     subprocess.check_call(args)
 
     # print("==== Check version ====")
-    distdir = "C:\\Linkout\\SceneExplorer\\"
+    
     ensureDir(distdir)
 
     print("==== deploying ====")
@@ -225,34 +237,23 @@ def main():
     print(args)
     subprocess.check_call(args)
 
-    # copyQtFile(distdir, 'platforms', getQtPluginPlatformDir(qtroot),'qwindows.dll')
     copyQtFile(distdir, 'platforms', qtTools.pluginPlatformDir(), 'qwindows.dll')
-    # copyQtFile(distdir, 'sqldrivers', getQtPluginSqldriversDir(qtroot), 'qsqlite.dll')
     copyQtFile(distdir, 'sqldrivers', qtTools.pluginSqldriversDir(), 'qsqlite.dll')
        
     dest = os.path.join(distdir, 'SceneExplorer.exe')
     copyfile(releaseexe, dest)
     print('copied: {0} => {1}'.format(releaseexe, dest))
 
-    # compile translation-- obsolete ( done in qmake and embedded in resource
-    # srctsfiles = glob.iglob(os.path.join('../src/translations', "*.ts"))
-    # for file in srctsfiles:
-    #    if os.path.isfile(file):
-    #        args = []
-    #        args.append(getLreleaseTool(qtroot))
-    #        args.append(file)
-    #        print(args)
-    #        subprocess.check_call(args)
     
-    # disttransdir = os.path.join(distdir, "translations")
-    # ensureDir(disttransdir)
-    #
-    # srcdistfiles = glob.iglob(os.path.join('../src/translations', "*.qm"))
-    # for file in srcdistfiles:
-    #    if os.path.isfile(file):
-    #        shutil.copy2(file, disttransdir)
+    # dist check
+    print("==== check files ====")
+    distconfig.checkTarget(distdir)
     
+    print("==== creating archive ====")
+    verstr = distconfig.getVersionString(distdir)
+    print('version is {0}'.format(verstr))
     
+    distconfig.createArchive(r"C:\LegacyPrograms\7-Zip\7z.exe", distdir, verstr)
 if __name__ == "__main__":
     # codetest()
 
