@@ -9,6 +9,7 @@ import glob
 import json
 import urllib.request
 import time
+from argparse import ArgumentParser
 
 import daver
 from easyhash import getSha1
@@ -70,7 +71,47 @@ def getFileCount(d):
         total += len(files)
     return total
 
+def getFileList(outdir):
+    f = []
+    for (dirpath, dirnames, filenames) in os.walk(outdir):
+      for name in filenames:
+        f.append(os.path.realpath( os.path.join(dirpath, name)))
 
+    return f
+    # return [f for f in os.listdir(outdir) if os.path.isfile(os.path.join(outdir, f))]
+  
+def getFull(files, outdir):
+    return [os.path.realpath(os.path.join(outdir, item)) for item in files]
+# https://stackoverflow.com/a/6486513
+def getDiffs(first, second):
+    first = set(first)
+    second = set(second)
+    return ([item for item in  second if item not in first],[item for item in first if item not in second])
+  
+def showDiffAndExit(outdir,exact):
+    shouldBes = getFull(configs["ShouldBeFiles"], outdir)
+    current = getFileList(outdir)
+    
+
+    (targetOver, listOver) = getDiffs(shouldBes,current);
+    message = ''
+    if(targetOver):
+      message += "Target directory contains following unlisted files:\n"
+      message += "\n".join(str(e) for e in targetOver)
+    if(listOver):
+      message == "\n"
+      message += "[ShouldBeFiles] list contains following non-existent files:\n"
+      message += "\n".join(str(e) for e in listOver)
+    
+    if(exact):
+      if(message):
+        myexit(message)
+    else:
+      message = "TotalFileCount different. ({} != {})\n".format(configs['TotalFileCount'], getFileCount(outdir)) + message
+      myexit(message)
+    
+    
+  
 def checkTarget(target):
     global configs
     
@@ -78,16 +119,27 @@ def checkTarget(target):
     print("=== Start Testing {} ===".format(outdir))
     
     if "ShouldNotBeFiles" in configs:
-        checkShouldnotExistFile(outdir,configs["ShouldNotBeFiles"])
+      checkShouldnotExistFile(outdir,configs["ShouldNotBeFiles"])
     
     if "ShouldBeFiles" in configs:
-        checkShouldBeFiles(outdir, configs["ShouldBeFiles"])
+      checkShouldBeFiles(outdir, configs["ShouldBeFiles"])
         
     if "ShouldBeOneOfThem" in configs:
-        checkShouldOneOfFiles(outdir, configs["ShouldBeOneOfThem"])
+      checkShouldOneOfFiles(outdir, configs["ShouldBeOneOfThem"])
 
-    if(configs['TotalFileCount'] != getFileCount(outdir)):
-        myexit("TotalFileCount different. ({} != {})".format(configs['TotalFileCount'], getFileCount(outdir)))
+
+           
+    if(('TotalFileCount' not in configs) or configs['TotalFileCount']== "exact"):
+      showDiffAndExit(outdir,True)
+    elif(isinstance( configs['TotalFileCount'], int)):
+      if(configs['TotalFileCount'] != getFileCount(outdir)):
+        showDiffAndExit(outdir,False)
+    else:
+        myexit("[TotalFileCount] must be int or 'exact'")
+      
+
+      
+
 
     print ("Total file count = {}".format(getFileCount(outdir)))    
 
@@ -100,10 +152,11 @@ def getVersionString(target):
     fileName = os.path.join(outdir, configs["obtainverfrom"])
     with open(fileName, "r", encoding="utf-8") as f:
         lines = f.readlines()
-        line=lines[0]
-        regstr = configs["obtainverregex"]
-        m = re.search(regstr, line)
-        return m.group(0)
+        for line in lines:
+          regstr = configs["obtainverregex"]
+          m = re.search(regstr, line)
+          if(m):
+            return m.group(0)
     
     myexit("Version not found.")
 
@@ -219,16 +272,31 @@ def main():
         
     print('{} {} ({})'.format(APPNAME,VERSION,APPDISC))
     
-    if len(sys.argv) < 1:
-        myexit("No input file." + HELPSTRING)
+    parser = ArgumentParser(
+        prog="distSolution",
+        description="Build Qt Project")
+        
+    parser.add_argument(
+        "-C",
+        nargs='?',
+        action="store",
+        help="Set current directory.")
+    parser.add_argument('main')
+    
+    args = parser.parse_args()
+    if args.C:
+        os.chdir(args.C)
+
+    distFile = args.main
     
     global configs    
-    print("Opening input {}".format(sys.argv[1]))
-    with open(sys.argv[1],encoding="utf-8") as data_file:
+    
+    print("Opening input {}".format(distFile))
+    with open(distFile,encoding="utf-8") as data_file:
         configs = json.load(data_file)
           
 
-    solutionFile = os.path.join(os.path.dirname(sys.argv[1]), configs["solution"])
+    solutionFile = os.path.join(os.path.dirname(distFile), configs["solution"])
     
     verstring="";
     

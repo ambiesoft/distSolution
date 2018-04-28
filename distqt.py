@@ -132,7 +132,7 @@ def main():
         "-C",
         nargs='?',
         action="store",
-        help="The message string.")
+        help="Set current directory.")
     parser.add_argument(
         "profile",
         nargs='?'
