@@ -121,7 +121,7 @@ class DistConfig:
             
         ]
         
-        args.append("-mx0");
+        args.append("-mx9");
         
         print(args)
         subprocess.check_call(args)
