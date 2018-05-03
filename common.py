@@ -2,6 +2,10 @@ import json
 import os
 import re
 import subprocess
+import daver
+from easyhash import getSha1
+import urllib.request
+import time
 
 def myexit(s):
     print(s)
@@ -94,11 +98,17 @@ class DistConfig:
     
         print ("Total file count = {}".format(getFileCount(outdir)))   
         
+        
+    def getArchiveFull(self,verstring):
+        configs = self.configs
+        self.archiveexe = "{}-{}{}".format(configs["name"], verstring, ".exe")
+        self.archiveFull = os.path.join(configs["archivedir"], self.archiveexe)
+        return self.archiveFull
+
     def createArchive(self, path7z, targetdir, verstring):
         configs = self.configs
         
-        archiveexe = "{}-{}{}".format(configs["name"], verstring, ".exe")
-        archiveexefull = os.path.join(configs["archivedir"], archiveexe)
+        archiveexefull = self.getArchiveFull(verstring)
         if os.path.isfile(archiveexefull):
             myexit('{} already exists, remove it first.'.format(archiveexefull))
 
@@ -111,8 +121,36 @@ class DistConfig:
             
         ]
         
-        args.append("-mx9");
+        args.append("-mx0");
         
         print(args)
         subprocess.check_call(args)
+        
+    def upload(self):
+        configs = self.configs
+        
+        archiveexefull = self.archiveFull
+        
+        print("==== Uploading to {}... ====".format(configs["remotedir"]))
+        daver.dupload(configs["remotedir"], archiveexefull)
+        print("Uploaded to {}".format(configs["remotedir"]))
+        
+        
+        print("==== Compute sha1 and compare... ====")
+        localSha1 = getSha1(archiveexefull)
+        remoteSha1Url = configs["remotesha1"].format(self.archiveexe)
+    
+        for loop in range(100):
+            try:
+                remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
+                break
+            except:
+                print("failed {} times to check remote Sha1. Will try again after waiting 5 seconds.".format(loop+1))
+                time.sleep(5) # wait 5 seconds
+        
+        if localSha1.lower() != remoteSha1.lower():
+            myexit("sha1 not equal ({} != {}".format(localSha1, remoteSha1))
+            
+        print("sha1 check succeed ({})".format(localSha1))
+
         

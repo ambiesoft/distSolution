@@ -254,6 +254,11 @@ def main():
     print('version is {0}'.format(verstr))
     
     distconfig.createArchive(r"C:\LegacyPrograms\7-Zip\7z.exe", distdir, verstr)
+    
+    
+    print("==== uploading archive ====")
+    distconfig.upload()
+    
 if __name__ == "__main__":
     # codetest()
 
