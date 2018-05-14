@@ -10,11 +10,11 @@ from common import *
 
 class QtTools:
 
-    def __init__(self, qtVer, qtRoot, qtTool, qtBuildTool):
+    def __init__(self, qtVer, qtRoot, qtTool, make):
         self.qtVer = qtVer
         self.qtRoot = qtRoot
         self.qtTool = qtTool
-        self.qtBuildTool = qtBuildTool
+        self.make = make
 
     def binDir(self):
         q = os.path.join(self.qtRoot, self.qtVer)
@@ -29,18 +29,16 @@ class QtTools:
 
         return q
 
-    def buildBinDir(self):
-        # cand = [
-        #    "Tools\\mingw530_32\\bin",
-        # ];
-        # qt = getQt();
+#     def buildBinDir(self):
+#         ret = os.path.join(self.qtRoot, 'Tools', self.qtBuildTool, 'bin')
+#         if not os.path.isdir(ret):
+#             myexit("{} is not directory.".format(ret))
+# 
+#         return ret
 
-        ret = os.path.join(self.qtRoot, 'Tools', self.qtBuildTool, 'bin')
-        if not os.path.isdir(ret):
-            myexit("{} is not directory.".format(ret))
-
-        return ret
-
+    def getMake(self):
+        return self.make
+    
     def qmake(self):
         dir = self.binDir()
         qmake = os.path.join(dir, "qmake.exe")
@@ -154,20 +152,32 @@ def main():
         action='store',
         help="Qt Version-tools (like mingw53_32)")
     parser.add_argument(
-        "-qttools",
-        nargs=1,
-        action='store',
-        help="Qt Tools (like mingw530_32)")
+         "-make",
+         nargs=1,
+         action='store',
+         help="path to 'make' or 'msbuild'")
     parser.add_argument(
         "-distfile",
         nargs=1,
         action='store',
         help="distfile")
+    parser.add_argument(
+        "-path",
+        nargs=1,
+        action='store',
+        help="set to path")
     
     args = parser.parse_args()
     if args.C:
         os.chdir(args.C)
         
+    if args.path:
+        for p in args.path:
+            my_env = os.environ.copy()
+            my_env["PATH"] = p + os.pathsep + my_env["PATH"]
+            os.environ['PATH'] = my_env['PATH']
+            print("{} is added to path.".format(p))
+             
     pro = args.profile
     if not pro:
         myexit("project file *.pro must be specified.")
@@ -185,16 +195,15 @@ def main():
     
     distdir = "C:\\Linkout\\SceneExplorer\\"
     
-    qtTools = QtTools(args.qtversion[0], args.qtroot[0], args.qtversiontools[0], args.qttools[0])
+    qtTools = QtTools(args.qtversion[0], args.qtroot[0], args.qtversiontools[0], args.make[0])
     distconfig = DistConfig(args.distfile[0])
 
     
-    buildtoolbin = qtTools.buildBinDir()
-
-    my_env = os.environ.copy()
-    my_env["PATH"] = buildtoolbin + os.pathsep + my_env["PATH"]
-    os.environ['PATH'] = my_env['PATH']
-    print("{} is added to path.".format(buildtoolbin))
+#     buildtoolbin = qtTools.buildBinDir()
+#     my_env = os.environ.copy()
+#     my_env["PATH"] = buildtoolbin + os.pathsep + my_env["PATH"]
+#     os.environ['PATH'] = my_env['PATH']
+#     print("{} is added to path.".format(buildtoolbin))
 
     os.chdir("build")
     print("Entered directory {}".format(os.getcwd()))
@@ -210,7 +219,7 @@ def main():
     subprocess.check_call(args)
 
     print("==== make ====")
-    make = "mingw32-make.exe"
+    make = qtTools.getMake() # "mingw32-make.exe"
 
     args = []
     args.append(make)
