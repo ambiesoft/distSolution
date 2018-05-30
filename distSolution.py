@@ -14,6 +14,8 @@ from argparse import ArgumentParser
 import daver
 from easyhash import getSha1
 
+from updateBBS import updateBBS
+
 APPNAME = 'distSolution'
 VERSION = '1.1';
 APPDISC = 'check files and archive them'
@@ -377,6 +379,9 @@ def main():
         
     print("sha1 check succeed ({})".format(localSha1))
     
+    
+    ## update BBS
+    
 def myexit(message, retval=1):
     
     print('DistError: ' + message)
@@ -384,6 +389,8 @@ def myexit(message, retval=1):
     exit(retval)
     
 def codetest():
+    updateBBS("testproject", "1.0", "file.zip")
+    
     remoteSha1 = urllib.request.urlopen("http://ambiesoft.fam.cx/ffdav/uploads/getSha1.php?file={}".format("/test/test.txt")).read().decode("utf-8")
     print(remoteSha1)
     
