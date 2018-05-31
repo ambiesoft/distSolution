@@ -7,6 +7,7 @@ from easyhash import getSha1
 import urllib.request
 import time
 
+
 def myexit(s):
     print(s)
     exit(1)
@@ -99,6 +100,10 @@ class DistConfig:
         print ("Total file count = {}".format(getFileCount(outdir)))   
         
         
+    def getArchiveName(self,verstring):
+        configs = self.configs
+        return "{}-{}{}".format(configs["name"], verstring, ".exe")
+        
     def getArchiveFull(self,verstring):
         configs = self.configs
         self.archiveexe = "{}-{}{}".format(configs["name"], verstring, ".exe")
@@ -125,6 +130,26 @@ class DistConfig:
         
         print(args)
         subprocess.check_call(args)
+        
+    def checkAlreadyUploaded(self, verstring):
+        """ check remote archive exist and quit if true. """
+        configs = self.configs
+        
+        url = configs['remotedir'] + self.getArchiveName(verstring)
+        
+        request = urllib.request.Request(url);
+        request.get_method = lambda : 'HEAD'
+        
+        responce = urllib.request.urlopen(request)
+        
+        if responce.status==200:
+            myexit("Archive already exists in remote site {0}. quitting.".format(url))
+        elif responce.status==404:
+            # OK 
+            return
+        else:
+            myexit("HEAD request returns invalid status {0}.".format(responce.status))
+        
         
     def upload(self):
         configs = self.configs

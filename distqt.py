@@ -262,9 +262,10 @@ def main():
     verstr = distconfig.getVersionString(distdir)
     print('version is {0}'.format(verstr))
     
+    distconfig.checkAlreadyUploaded(verstr)
+
     distconfig.createArchive(r"C:\LegacyPrograms\7-Zip\7z.exe", distdir, verstr)
-    
-    
+        
     print("==== uploading archive ====")
     distconfig.upload()
     
