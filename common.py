@@ -140,11 +140,16 @@ class DistConfig:
         request = urllib.request.Request(url);
         request.get_method = lambda : 'HEAD'
         
-        responce = urllib.request.urlopen(request)
-        
-        if responce.status==200:
+        status = 0
+        try:
+            responce = urllib.request.urlopen(request)
+            status = responce.status
+        except urllib.error.HTTPError as e:
+            status = e.code
+            
+        if status==200:
             myexit("Archive already exists in remote site {0}. quitting.".format(url))
-        elif responce.status==404:
+        elif status==404:
             # OK 
             return
         else:
