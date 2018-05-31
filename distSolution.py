@@ -327,7 +327,12 @@ def main():
     archiveexefull = os.path.join(configs["archivedir"], archiveexe)
     if isfile(archiveexefull):
         myexit('{} already exists, remove it first.'.format(archiveexefull))
-        
+     
+    # AKITA    
+    #urlfull = configs['remotedir'] + archiveexe
+    #if isRemoteExists(urlfull):
+    #    myexit('{} already exists'.format(urlfull))
+               
     print("==== creating arhive {} ====".format(archiveexefull))
     
 #    if(os.path.exists(archiveexefull)):
