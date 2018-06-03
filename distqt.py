@@ -69,21 +69,15 @@ class QtTools:
 
         return q;
 
-    def pluginPlatformDir(self):
+    def pluginSubDir(self, dir):
         q = self.pluginDir()
-        q = os.path.join(q, "platforms")
+        q = os.path.join(q, dir)
         if not os.path.isdir(q):
             myexit("{} is not found.".format(q))
 
         return q
 
-    def pluginSqldriversDir(self):
-        q = self.pluginDir()
-        q = os.path.join(q, "sqldrivers")
-        if not os.path.isdir(q):
-            myexit("{} is not found.".format(q))
 
-        return q
 
 
                 
@@ -246,8 +240,9 @@ def main():
     print(args)
     subprocess.check_call(args)
 
-    copyQtFile(distdir, 'platforms', qtTools.pluginPlatformDir(), 'qwindows.dll')
-    copyQtFile(distdir, 'sqldrivers', qtTools.pluginSqldriversDir(), 'qsqlite.dll')
+    copyQtFile(distdir, 'platforms', qtTools.pluginSubDir('platforms'), 'qwindows.dll')
+    copyQtFile(distdir, 'sqldrivers', qtTools.pluginSubDir('sqldrivers'), 'qsqlite.dll')
+    copyQtFile(distdir, 'imageformats', qtTools.pluginSubDir('imageformats'), 'qjpeg.dll')
        
     dest = os.path.join(distdir, 'SceneExplorer.exe')
     copyfile(releaseexe, dest)
