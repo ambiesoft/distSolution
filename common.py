@@ -6,11 +6,8 @@ import daver
 from easyhash import getSha1
 import urllib.request
 import time
+from funcs import myexit,showDiffAndExit,getAsFullpath,IsRemoteArchiveExists
 
-
-def myexit(s):
-    print(s)
-    exit(1)
 
 def getFileCount(d):
     total = 0
@@ -94,10 +91,19 @@ class DistConfig:
         if "ShouldBeOneOfThem" in configs:
             self.checkShouldOneOfFiles(outdir, configs["ShouldBeOneOfThem"])
     
-        if(configs['TotalFileCount'] != getFileCount(outdir)):
-            myexit("TotalFileCount different. ({} != {})".format(configs['TotalFileCount'], getFileCount(outdir)))
-    
-        print ("Total file count = {}".format(getFileCount(outdir)))   
+        shouldBeFull = getAsFullpath(configs["ShouldBeFiles"], outdir)
+        
+        if(('TotalFileCount' not in configs) or configs['TotalFileCount']== "exact"):
+            showDiffAndExit(outdir,shouldBeFull,configs['TotalFileCount'],True)
+        elif(isinstance( configs['TotalFileCount'], int)):
+            if(configs['TotalFileCount'] != getFileCount(outdir)):
+                showDiffAndExit(outdir,shouldBeFull,configs['TotalFileCount'],False)
+        else:
+            myexit("[TotalFileCount] must be int or 'exact'")
+          
+        print ("Total file count = {}".format(getFileCount(outdir))) 
+
+   
         
         
     def getArchiveName(self,verstring):
@@ -137,23 +143,10 @@ class DistConfig:
         
         url = configs['remotedir'] + self.getArchiveName(verstring)
         
-        request = urllib.request.Request(url);
-        request.get_method = lambda : 'HEAD'
-        
-        status = 0
-        try:
-            responce = urllib.request.urlopen(request)
-            status = responce.status
-        except urllib.error.HTTPError as e:
-            status = e.code
-            
-        if status==200:
+        if IsRemoteArchiveExists(url):
             myexit("Archive already exists in remote site {0}. quitting.".format(url))
-        elif status==404:
-            # OK 
-            return
-        else:
-            myexit("HEAD request returns invalid status {0}.".format(responce.status))
+            
+
         
         
     def upload(self):

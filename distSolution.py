@@ -10,11 +10,10 @@ import json
 import urllib.request
 import time
 from argparse import ArgumentParser
-
 import daver
 from easyhash import getSha1
-
 from updateBBS import updateBBS
+from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDiffAndExit,IsRemoteArchiveExists
 
 APPNAME = 'distSolution'
 VERSION = '1.1';
@@ -73,46 +72,9 @@ def getFileCount(d):
         total += len(files)
     return total
 
-def getFileList(outdir):
-    f = []
-    for (dirpath, dirnames, filenames) in os.walk(outdir):
-      for name in filenames:
-        f.append(os.path.realpath( os.path.join(dirpath, name)))
-
-    return f
-    # return [f for f in os.listdir(outdir) if os.path.isfile(os.path.join(outdir, f))]
+    
   
-def getFull(files, outdir):
-    return [os.path.realpath(os.path.join(outdir, item)) for item in files]
-# https://stackoverflow.com/a/6486513
-def getDiffs(first, second):
-    first = set(first)
-    second = set(second)
-    return ([item for item in  second if item not in first],[item for item in first if item not in second])
-  
-def showDiffAndExit(outdir,exact):
-    shouldBes = getFull(configs["ShouldBeFiles"], outdir)
-    current = getFileList(outdir)
-    
 
-    (targetOver, listOver) = getDiffs(shouldBes,current);
-    message = ''
-    if(targetOver):
-      message += "Target directory contains following unlisted files:\n"
-      message += "\n".join(str(e) for e in targetOver)
-    if(listOver):
-      message == "\n"
-      message += "[ShouldBeFiles] list contains following non-existent files:\n"
-      message += "\n".join(str(e) for e in listOver)
-    
-    if(exact):
-      if(message):
-        myexit(message)
-    else:
-      message = "TotalFileCount different. ({} != {})\n".format(configs['TotalFileCount'], getFileCount(outdir)) + message
-      myexit(message)
-    
-    
   
 def checkTarget(target):
     global configs
@@ -129,20 +91,16 @@ def checkTarget(target):
     if "ShouldBeOneOfThem" in configs:
       checkShouldOneOfFiles(outdir, configs["ShouldBeOneOfThem"])
 
-
-           
+    shouldBeFull = getAsFullpath(configs["ShouldBeFiles"], outdir)
+    
     if(('TotalFileCount' not in configs) or configs['TotalFileCount']== "exact"):
-      showDiffAndExit(outdir,True)
+        showDiffAndExit(outdir,shouldBeFull,configs['TotalFileCount'],True)
     elif(isinstance( configs['TotalFileCount'], int)):
-      if(configs['TotalFileCount'] != getFileCount(outdir)):
-        showDiffAndExit(outdir,False)
+        if(configs['TotalFileCount'] != getFileCount(outdir)):
+            showDiffAndExit(outdir,shouldBeFull,configs['TotalFileCount'],False)
     else:
         myexit("[TotalFileCount] must be int or 'exact'")
       
-
-      
-
-
     print ("Total file count = {}".format(getFileCount(outdir)))    
 
 def getVersionString(target):
@@ -328,10 +286,9 @@ def main():
     if isfile(archiveexefull):
         myexit('{} already exists, remove it first.'.format(archiveexefull))
      
-    # AKITA    
-    #urlfull = configs['remotedir'] + archiveexe
-    #if isRemoteExists(urlfull):
-    #    myexit('{} already exists'.format(urlfull))
+    urlfull = configs['remotedir'] + archiveexe
+    if IsRemoteArchiveExists(urlfull):
+        myexit('{} already exists'.format(urlfull))
                
     print("==== creating arhive {} ====".format(archiveexefull))
     
@@ -389,11 +346,7 @@ def main():
     print("==== Updating BBS... ====")
     print(updateBBS( configs['name'], verstring, configs["remotedir"] + archiveexe))
     
-def myexit(message, retval=1):
-    
-    print('DistError: ' + message)
-    # input('Press ENTER to exit')
-    exit(retval)
+
     
 def codetest():
     print(updateBBS("testproject", "1.0", "file.zip"))
