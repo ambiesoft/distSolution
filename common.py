@@ -18,12 +18,19 @@ def getFileCount(d):
 
             
 class DistConfig:
+    __version = ''
+    
     def __init__(self, path):
             with open(path,encoding="utf-8") as data_file:
                 self.configs = json.load(data_file)
                 
 
-                    
+    def getProjectName(self):
+        return self.configs['name']
+
+    def getRemoteDir(self):
+        return self.configs["remotedir"]                        
+    
     def checkShouldnotExistFile(self, distDir, shouldnot):
         """ Return false if a file that should not be distributed exists. """
         for f in shouldnot:
@@ -65,6 +72,8 @@ class DistConfig:
                     
     def getVersionString(self, outdir):
         """get version string from history.txt"""
+        if self.__version:
+            return self.__version
         configs = self.configs
         
         fileName = os.path.join(outdir, configs["obtainverfrom"])
@@ -73,10 +82,30 @@ class DistConfig:
             line=lines[0]
             regstr = configs["obtainverregex"]
             m = re.search(regstr, line)
-            return m.group(0)
+            
+            self.__version = m.group(0)
+            return self.__version
         
         myexit("Version not found.")
-                            
+
+    def getChangeLong(self,outdir):
+        configs = self.configs
+        fileName = os.path.join(outdir, configs["obtainverfrom"])
+        getFirst = False
+        rets = []
+        with open(fileName, "r", encoding="utf-8") as f:
+            regstr = configs["obtainverregex"]
+            for line in f.readlines():
+                m = re.search(regstr, line)
+            
+                if m and m.group(0):
+                    if not getFirst:
+                        getFirst=True
+                        continue
+                    return ''.join(rets)
+                rets.append(line)
+        return ''.join(rets)    
+                                    
     def checkTarget(self, outdir):
         configs = self.configs
         
@@ -176,4 +205,5 @@ class DistConfig:
             
         print("sha1 check succeed ({})".format(localSha1))
 
+        
         

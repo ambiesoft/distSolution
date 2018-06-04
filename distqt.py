@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 import glob, shutil
 import json
 from common import *
+from updateBBS import updateBBS
 
 class QtTools:
 
@@ -252,17 +253,29 @@ def main():
     # dist check
     print("==== check files ====")
     distconfig.checkTarget(distdir)
-    
-    print("==== creating archive ====")
-    verstr = distconfig.getVersionString(distdir)
-    print('version is {0}'.format(verstr))
-    
-    distconfig.checkAlreadyUploaded(verstr)
 
+
+
+    verstr = distconfig.getVersionString(distdir)
+
+
+    print("==== creating archive ====")
+    print('version is {0}'.format(verstr))
+    distconfig.checkAlreadyUploaded(verstr)
     distconfig.createArchive(r"C:\LegacyPrograms\7-Zip\7z.exe", distdir, verstr)
         
+
     print("==== uploading archive ====")
     distconfig.upload()
+    
+
+    ## update BBS
+    print("==== Updating BBS... ====")
+    print(updateBBS( distconfig.getProjectName(), 
+                     verstr, 
+                     distconfig.getRemoteDir() + distconfig.getArchiveName(verstr),
+                     distconfig.getChangeLong(distdir)))
+
     
 if __name__ == "__main__":
     # codetest()

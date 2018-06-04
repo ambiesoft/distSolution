@@ -34,7 +34,7 @@ if __name__ == '__main__':
     }
     print( wbs_request(":POST", 'http://www.amazon.co.jp/s/', postdata))
 
-def updateBBS(project, version, archive):
+def updateBBS(project, version, archive, info):
     """update bbs"""
 
     postdata = {
@@ -44,7 +44,7 @@ def updateBBS(project, version, archive):
         'email':'ambiesoft.trueff@gmail.com',
         'subject' : '更新されました: {0}'.format(project),
         'delkey' : random.randrange(65535),
-        'body' : '{0} ver{1} updated.\n{2}'.format(project, version, archive)
+        'body' : '{0} ver{1} updated.\n{2}\n\n更新内容：\n{3}'.format(project, version, archive, info)
     }
     
     return wbs_request(":post", BBSULR, postdata)
