@@ -6,7 +6,7 @@ import daver
 from easyhash import getSha1
 import urllib.request
 import time
-from funcs import myexit,showDiffAndExit,getAsFullpath,IsRemoteArchiveExists
+from funcs import myexit,showDiffAndExit,getAsFullpath,IsRemoteArchiveExists,getChangeLog
 
 
 def getFileCount(d):
@@ -91,20 +91,10 @@ class DistConfig:
     def getChangeLong(self,outdir):
         configs = self.configs
         fileName = os.path.join(outdir, configs["obtainverfrom"])
-        getFirst = False
-        rets = []
-        with open(fileName, "r", encoding="utf-8") as f:
-            regstr = configs["obtainverregex"]
-            for line in f.readlines():
-                m = re.search(regstr, line)
-            
-                if m and m.group(0):
-                    if not getFirst:
-                        getFirst=True
-                        continue
-                    return ''.join(rets)
-                rets.append(line)
-        return ''.join(rets)    
+        regstr = configs["obtainverregex"]
+        
+        return getChangeLog(fileName, regstr)
+     
                                     
     def checkTarget(self, outdir):
         configs = self.configs

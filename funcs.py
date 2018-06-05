@@ -1,4 +1,5 @@
 import os
+import re
 import urllib.request
 
 def getAsFullpath(files, outdir):
@@ -69,5 +70,18 @@ def IsRemoteArchiveExists(url):
     else:
         myexit("HEAD request returns invalid status {0}.".format(responce.status))
 
-
+def getChangeLog(fileName, regstr):
+    rets = []
+    getFirst = False
+    with open(fileName, "r", encoding="utf-8") as f:
+        for line in f.readlines():
+            m = re.search(regstr, line)
         
+            if m and m.group(0):
+                if not getFirst:
+                    getFirst=True
+                    continue
+                return ''.join(rets)
+            rets.append(line)
+    return ''.join(rets)            
+

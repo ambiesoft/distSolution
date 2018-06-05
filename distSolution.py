@@ -13,7 +13,7 @@ from argparse import ArgumentParser
 import daver
 from easyhash import getSha1
 from updateBBS import updateBBS
-from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDiffAndExit,IsRemoteArchiveExists
+from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDiffAndExit,IsRemoteArchiveExists,getChangeLog
 
 APPNAME = 'distSolution'
 VERSION = '1.1';
@@ -289,13 +289,13 @@ def main():
     urlfull = configs['remotedir'] + archiveexe
     if IsRemoteArchiveExists(urlfull):
         myexit('{} already exists'.format(urlfull))
-               
-    print("==== creating arhive {} ====".format(archiveexefull))
     
+               
+
+    print("==== creating arhive {} ====".format(archiveexefull))
 #    if(os.path.exists(archiveexefull)):
 #        print("{} already exists. Remove it first.".format(archiveexefull))
 #        myexit(1)
-    
     args = [
         r"C:\LegacyPrograms\7-Zip\7z.exe",
         "a",
@@ -303,6 +303,7 @@ def main():
         archiveexefull,
     ]
     
+
     
     # no duplicate in args
     addedtarget=[]
@@ -341,11 +342,21 @@ def main():
         
     print("sha1 check succeed ({})".format(localSha1))
     
-    
+
     ## update BBS
     print("==== Updating BBS... ====")
-    print(updateBBS( configs['name'], verstring, configs["remotedir"] + archiveexe))
+    historyFull = os.path.join(configs['targets'][0]['outdir'],
+                               configs['obtainverfrom'])
+    versionReg = configs['obtainverregex']
+    print(updateBBS( configs['name'], 
+                     verstring, 
+                     configs["remotedir"] + archiveexe,
+                     getChangeLog(historyFull, versionReg)
+                     ))
     
+
+    ######################
+    ######################
 
     
 def codetest():
