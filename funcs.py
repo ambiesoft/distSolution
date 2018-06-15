@@ -5,6 +5,11 @@ import urllib.request
 def getAsFullpath(files, outdir):
     return [os.path.realpath(os.path.join(outdir, item)) for item in files]
 
+def getFileCount(d):
+    total = 0
+    for _, _, files in os.walk(d):
+        total += len(files)
+    return total
 
 # https://stackoverflow.com/a/6486513
 def getPathDiffs(first, second):

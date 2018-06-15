@@ -13,7 +13,8 @@ from argparse import ArgumentParser
 import daver
 from easyhash import getSha1
 from updateBBS import updateBBS
-from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDiffAndExit,IsRemoteArchiveExists,getChangeLog
+from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDiffAndExit,IsRemoteArchiveExists,getChangeLog,getFileCount
+
 
 APPNAME = 'distSolution'
 VERSION = '1.1';
@@ -66,11 +67,7 @@ def checkShouldOneOfFiles(distDir, shouldone):
     
     return True
             
-def getFileCount(d):
-    total = 0
-    for _, _, files in os.walk(d):
-        total += len(files)
-    return total
+
 
     
   
