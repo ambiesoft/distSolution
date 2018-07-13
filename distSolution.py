@@ -300,16 +300,17 @@ def main():
         archiveexefull,
     ]
     
-
-    
-    # no duplicate in args
-    addedtarget=[]
-    for t in configs['targets']:
-        outdir = t['outdir']
-        if outdir not in addedtarget:
-            outdirfull = os.path.abspath(outdir)
-            args.append(outdirfull)
-        addedtarget.append(outdir)
+    if 'archivingdir' in configs:
+        args.append(os.path.abspath(configs['archivingdir']))
+    else:
+        # no duplicate in args
+        addedtarget=[]
+        for t in configs['targets']:
+            outdir = t['outdir']
+            if outdir not in addedtarget:
+                outdirfull = os.path.abspath(outdir)
+                args.append(outdirfull)
+            addedtarget.append(outdir)
         
     args.append("-mx9");
     
