@@ -4,7 +4,7 @@ import time
 from _sqlite3 import version
 import random
 
-BBSULR='http://ambiesoft.fam.cx/minibbs/minibbs.php'
+BBSULR='https://ambiesoft.fam.cx/minibbs/minibbs.php'
 
 # https://gist.github.com/masahitojp/863593
 def wbs_request(method_string, url, args={}):
