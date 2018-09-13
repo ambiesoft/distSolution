@@ -199,3 +199,5 @@ class DistConfig:
     def getBuiltExes(self):
         return self.configs['builtexes']
         
+    def getCopyPlugins(self):
+        return self.configs['copyplugins']

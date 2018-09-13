@@ -8,6 +8,8 @@ import glob, shutil
 import json
 from common import *
 from updateBBS import updateBBS
+import errno
+import shutil
 
 class QtTools:
 
@@ -70,13 +72,6 @@ class QtTools:
 
         return q;
 
-    def pluginSubDir(self, dir):
-        q = self.pluginDir()
-        q = os.path.join(q, dir)
-        if not os.path.isdir(q):
-            myexit("{} is not found.".format(q))
-
-        return q
 
 
 
@@ -104,16 +99,32 @@ def ensureDir(dir):
             myexit('Could not create {}'.format(dir))
 
 
-def copyQtFile(distdir, distsubdir, qtdir, qtfile):
-    d = os.path.join(distdir, distsubdir)
-    ensureDir(d)
-    dll = os.path.join(qtdir, qtfile)
-    if not os.path.isfile(dll):
-        myexit('{} not found.'.format(dll))
+def copyQtFile(distdir, plugindir, qtfile):
+    src = os.path.join(plugindir, qtfile)
+    dest = os.path.join(distdir, qtfile)
+
+    #https://stackoverflow.com/a/46014620
+    try:
+        shutil.copy(src, dest)
+    except IOError as e:
+        # ENOENT(2): file does not exist, raised also on missing dest parent dir
+        if e.errno != errno.ENOENT:
+            raise
+        # try creating parent directories
+        os.makedirs(os.path.dirname(dest))
+        shutil.copy(src, dest)
+
+    print('copied: {0} => {1}'.format(src, dest))
+
+    #d = os.path.join(distdir, distsubdir)
+    #ensureDir(d)
+    #dll = os.path.join(qtdir, qtfile)
+    #if not os.path.isfile(dll):
+    #    myexit('{} not found.'.format(dll))
     
-    dest = os.path.join(d, qtfile)
-    copyfile(dll, dest)
-    print('copied: {0} => {1}'.format(dll, dest))
+    #dest = os.path.join(d, qtfile)
+    #copyfile(dll, dest)
+    #print('copied: {0} => {1}'.format(dll, dest))
 
     
 def main():
@@ -194,9 +205,9 @@ def main():
             myexit("Could not create dir [build]")
 
     
-    distdir = args.distdir[0]
-    if not distdir:
+    if not args.distdir:
         myexit("-distdir must not be empty.")
+    distdir = args.distdir[0]
     if not os.path.isdir(distdir):
         os.mkdir(distdir)
         if not os.path.isdir(distdir):
@@ -258,14 +269,16 @@ def main():
         print(args)
         subprocess.check_call(args)
     
-        copyQtFile(distdir, 'platforms', qtTools.pluginSubDir('platforms'), 'qwindows.dll')
-        copyQtFile(distdir, 'sqldrivers', qtTools.pluginSubDir('sqldrivers'), 'qsqlite.dll')
-        copyQtFile(distdir, 'imageformats', qtTools.pluginSubDir('imageformats'), 'qjpeg.dll')
            
         dest = os.path.join(distdir, '{}.exe'.format(distconfig.getProjectName()))
         copyfile(releaseexe, dest)
         print('copied: {0} => {1}'.format(releaseexe, dest))
 
+    # copy plugins
+    copyQtFile(distdir, qtTools.pluginDir(), 'platforms/qwindows.dll')
+    for plugin in distconfig.getCopyPlugins():
+        copyQtFile(distdir, qtTools.pluginDir(), plugin)
+    
     
     # dist check
     print("==== check files ====")

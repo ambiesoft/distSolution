@@ -7,13 +7,14 @@
     <ProjectHome />
     <StartupFile>distqt.py</StartupFile>
     <SearchPath />
-    <WorkingDirectory>C:\local\msys2\home\hmadan\gitdev\SceneExplorer\</WorkingDirectory>
+    <WorkingDirectory>C:\local\msys2\home\kineko\gitdev\SceneExplorer</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>C:\local\msys2\home\hmadan\gitdev\SceneExplorer\src\SceneExplorer.pro -qtroot C:\local\Qt</CommandLineArguments>
+    <CommandLineArguments>src\SceneExplorer.pro -distdir "C:\Linkout\SceneExplorer" -qtroot C:\local\Qt -qtversion 5.11.0 -qtversiontools mingw53_32 -distfile dist.json -make mingw32-make.exe -path C:\local\Qt\Tools\mingw530_32\bin</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
+    <InterpreterId>Global|VisualStudio|Python 3.5</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -21,6 +22,7 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="common.py" />
     <Compile Include="createDistJson.py" />
     <Compile Include="daver.py" />
     <Compile Include="distqt.py" />
@@ -34,6 +36,8 @@
   <ItemGroup>
     <Folder Include="easywebdav" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <InterpreterReference Include="Global|VisualStudio|Python 3.5" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 </Project>
