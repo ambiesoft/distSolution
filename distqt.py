@@ -242,27 +242,29 @@ def main():
     ensureDir(distdir)
 
     print("==== deploying ====")
-    args = []
-    deploytool = qtTools.deployTool()  # getDeployTool(qtroot)
-    releaseexe = "release/{}.exe".format(distconfig.getProjectName())
-    if not os.path.isfile(releaseexe):
-        myexit("Release exe {} not found.".format(releaseexe))
-
-
-    args.append(deploytool)
-    args.append(releaseexe)
-    args.append('--libdir')
-    args.append(distdir)
-    print(args)
-    subprocess.check_call(args)
-
-    copyQtFile(distdir, 'platforms', qtTools.pluginSubDir('platforms'), 'qwindows.dll')
-    copyQtFile(distdir, 'sqldrivers', qtTools.pluginSubDir('sqldrivers'), 'qsqlite.dll')
-    copyQtFile(distdir, 'imageformats', qtTools.pluginSubDir('imageformats'), 'qjpeg.dll')
-       
-    dest = os.path.join(distdir, '{}.exe'.format(distconfig.getProjectName()))
-    copyfile(releaseexe, dest)
-    print('copied: {0} => {1}'.format(releaseexe, dest))
+    for releaseexe in distconfig.getBuiltExes(): 
+        args = []
+        deploytool = qtTools.deployTool()  # getDeployTool(qtroot)
+        # releaseexe = "release/{}.exe".format(distconfig.getProjectName())
+    
+        if not os.path.isfile(releaseexe):
+            myexit("Release exe {} not found.".format(releaseexe))
+    
+    
+        args.append(deploytool)
+        args.append(releaseexe)
+        args.append('--libdir')
+        args.append(distdir)
+        print(args)
+        subprocess.check_call(args)
+    
+        copyQtFile(distdir, 'platforms', qtTools.pluginSubDir('platforms'), 'qwindows.dll')
+        copyQtFile(distdir, 'sqldrivers', qtTools.pluginSubDir('sqldrivers'), 'qsqlite.dll')
+        copyQtFile(distdir, 'imageformats', qtTools.pluginSubDir('imageformats'), 'qjpeg.dll')
+           
+        dest = os.path.join(distdir, '{}.exe'.format(distconfig.getProjectName()))
+        copyfile(releaseexe, dest)
+        print('copied: {0} => {1}'.format(releaseexe, dest))
 
     
     # dist check

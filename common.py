@@ -196,4 +196,6 @@ class DistConfig:
         print("sha1 check succeed ({})".format(localSha1))
 
         
+    def getBuiltExes(self):
+        return self.configs['builtexes']
         
