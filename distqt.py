@@ -161,8 +161,14 @@ def main():
         nargs=1,
         action='store',
         help="set to path")
+    parser.add_argument(
+        "-distdir",
+        nargs=1,
+        action='store',
+        help="distdir")
     
     args = parser.parse_args()
+    
     if args.C:
         os.chdir(args.C)
         
@@ -188,10 +194,19 @@ def main():
             myexit("Could not create dir [build]")
 
     
-    distdir = "C:\\Linkout\\SceneExplorer\\"
+    distdir = args.distdir[0]
+    if not distdir:
+        myexit("-distdir must not be empty.")
+    if not os.path.isdir(distdir):
+        os.mkdir(distdir)
+        if not os.path.isdir(distdir):
+            myexit("'{}' is not a directory.".format(distdir))
+        
+    
     
     qtTools = QtTools(args.qtversion[0], args.qtroot[0], args.qtversiontools[0], args.make[0])
     distconfig = DistConfig(args.distfile[0])
+
 
     
 #     buildtoolbin = qtTools.buildBinDir()
@@ -229,7 +244,7 @@ def main():
     print("==== deploying ====")
     args = []
     deploytool = qtTools.deployTool()  # getDeployTool(qtroot)
-    releaseexe = "release/SceneExplorer.exe"
+    releaseexe = "release/{}.exe".format(distconfig.getProjectName())
     if not os.path.isfile(releaseexe):
         myexit("Release exe {} not found.".format(releaseexe))
 
@@ -245,7 +260,7 @@ def main():
     copyQtFile(distdir, 'sqldrivers', qtTools.pluginSubDir('sqldrivers'), 'qsqlite.dll')
     copyQtFile(distdir, 'imageformats', qtTools.pluginSubDir('imageformats'), 'qjpeg.dll')
        
-    dest = os.path.join(distdir, 'SceneExplorer.exe')
+    dest = os.path.join(distdir, '{}.exe'.format(distconfig.getProjectName()))
     copyfile(releaseexe, dest)
     print('copied: {0} => {1}'.format(releaseexe, dest))
 
