@@ -1,5 +1,6 @@
 import os
 import re
+import urllib
 import urllib.request
 
 def getAsFullpath(files, outdir):
@@ -57,6 +58,7 @@ def showDiffAndExit(outdir, shouldBeFull, shouldTotal, exact):
         
         
 def IsRemoteArchiveExists(url):
+    print(url)
     request = urllib.request.Request(url);
     request.get_method = lambda : 'HEAD'
     

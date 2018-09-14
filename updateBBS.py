@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import urllib
 import time
-from _sqlite3 import version
+# from _sqlite3 import version
 import random
 
 BBSULR='https://ambiesoft.fam.cx/minibbs/minibbs.php'
