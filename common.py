@@ -201,3 +201,7 @@ class DistConfig:
         
     def getCopyPlugins(self):
         return self.configs['copyplugins']
+    
+    def getCopyTranslations(self):
+        return self.configs['copytranslations']
+    

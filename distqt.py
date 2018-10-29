@@ -73,7 +73,19 @@ class QtTools:
         return q;
 
 
+    def translationsDir(self):
+        q = os.path.join(self.qtRoot, self.qtVer)
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
+        q = os.path.join(q, self.qtTool)
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
+        q = os.path.join(q, "translations")
+        if not os.path.isdir(q):
+            myexit("{} is not found.".format(q))
 
+        return q;
+        
 
 
                 
@@ -275,10 +287,21 @@ def main():
         print('copied: {0} => {1}'.format(releaseexe, dest))
 
     # copy plugins
+    print("==== copy plugins ====")
     copyQtFile(distdir, qtTools.pluginDir(), 'platforms/qwindows.dll')
     for plugin in distconfig.getCopyPlugins():
         copyQtFile(distdir, qtTools.pluginDir(), plugin)
     
+    # copy qt translation files
+    print("==== copy translations of Qt ====")
+    desttransdir = os.path.join(distdir, 'translations');
+    if not os.path.isdir(desttransdir):
+        os.mkdir(desttransdir)
+        if not os.path.isdir(desttransdir):
+            myexit('{0} is not a directory'.format(desttransdir))
+    for trans in distconfig.getCopyTranslations():
+        copyQtFile(desttransdir, qtTools.translationsDir(), trans) #os.path.join('translation',trans))
+
     
     # dist check
     print("==== check files ====")
