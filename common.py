@@ -162,6 +162,7 @@ class DistConfig:
         
         url = configs['remotedir'] + self.getArchiveName(verstring)
         
+        print("checking {} ...".format(url))
         if IsRemoteArchiveExists(url):
             myexit("Archive already exists in remote site {0}. quitting.".format(url))
             

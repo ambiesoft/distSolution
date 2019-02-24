@@ -58,7 +58,7 @@ def showDiffAndExit(outdir, shouldBeFull, shouldTotal, exact):
         
         
 def IsRemoteArchiveExists(url):
-    print(url)
+    
     request = urllib.request.Request(url);
     request.get_method = lambda : 'HEAD'
     
