@@ -294,7 +294,7 @@ def main():
 #        print("{} already exists. Remove it first.".format(archiveexefull))
 #        myexit(1)
     args = [
-        r"C:\LegacyPrograms\7-Zip\7z.exe",
+        r"C:/LegacyPrograms/7-Zip/7z.exe",
         "a",
         "-sfx7z.sfx",
         archiveexefull,
