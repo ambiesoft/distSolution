@@ -182,7 +182,7 @@ def build(solution,target):
         args.append("/p:platform={}".format(target["platform"]))
  
     if "setoutdirforbuild" in target and target["setoutdirforbuild"]:
-        outDirBuild = target["outdir"]
+        outDirBuild = os.path.abspath(target["outdir"])
         outDirBuild = os.path.join(outDirBuild, '')  # will add the trailing slash if it's not already there.
         args.append('/p:outdir={}'.format(outDirBuild))
                
