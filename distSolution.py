@@ -17,7 +17,7 @@ from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDi
 
 
 APPNAME = 'distSolution'
-VERSION = '1.1';
+VERSION = '1.2.1';
 APPDISC = 'check files and archive them'
 
 # global config
@@ -127,6 +127,10 @@ def getMsBuildExe2(pf, vsvar):
             pf = os.path.join(pf, R"Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe")
             if isfile(pf):
                 return pf
+        elif vsvar==16:
+            pf = os.path.join(pf, R"Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe")
+            if isfile(pf):
+                return pf
     return None
  
 def getMsBuildExe(solution):
@@ -146,6 +150,10 @@ def getMsBuildExe(solution):
             elif topver==15:
                 print ("solution is for Visual Studio 15")
                 vsvar=15
+                break
+            elif topver==16:
+                print ("solution is for Visual Studio 2019")
+                vsvar=16
                 break
                 
     if not vsvar:
