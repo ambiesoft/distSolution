@@ -17,7 +17,7 @@ from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDi
 
 
 APPNAME = 'distSolution'
-VERSION = '1.2.1';
+VERSION = '1.2.2';
 APPDISC = 'check files and archive them'
 
 # global config
