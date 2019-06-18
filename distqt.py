@@ -111,9 +111,9 @@ def ensureDir(dir):
             myexit('Could not create {}'.format(dir))
 
 
-def copyQtFile(distdir, plugindir, qtfile):
-    src = os.path.join(plugindir, qtfile)
-    dest = os.path.join(distdir, qtfile)
+def copyQtFile(destdir, srcdir, qtfile):
+    src = os.path.join(srcdir, qtfile)
+    dest = os.path.join(destdir, qtfile)
 
     #https://stackoverflow.com/a/46014620
     try:
@@ -128,17 +128,7 @@ def copyQtFile(distdir, plugindir, qtfile):
 
     print('copied: {0} => {1}'.format(src, dest))
 
-    #d = os.path.join(distdir, distsubdir)
-    #ensureDir(d)
-    #dll = os.path.join(qtdir, qtfile)
-    #if not os.path.isfile(dll):
-    #    myexit('{} not found.'.format(dll))
-    
-    #dest = os.path.join(d, qtfile)
-    #copyfile(dll, dest)
-    #print('copied: {0} => {1}'.format(dll, dest))
-
-    
+        
 def main():
     parser = ArgumentParser(
         prog="distqt",
