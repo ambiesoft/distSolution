@@ -8,7 +8,7 @@ def dupload(remotedir, archive):
     
     # Start off by creating a client object. Username and
     # password may be omitted if no authentication is needed.
-    webdav = easywebdav.connect(o.hostname, protocol='https') # , username='myuser', password='mypass')
+    webdav = easywebdav.connect(o.hostname, protocol=o.protocol) # protocol='https') # , username='myuser', password='mypass')
     
     updir = o.path
     try:
