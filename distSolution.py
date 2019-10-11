@@ -368,7 +368,7 @@ def main():
 def codetest():
     print(updateBBS("testproject", "1.0", "file.zip"))
     
-    remoteSha1 = urllib.request.urlopen("http://ambiesoft.fam.cx/ffdav/uploads/getSha1.php?file={}".format("/test/test.txt")).read().decode("utf-8")
+    remoteSha1 = urllib.request.urlopen("http://ambiesoft.mooo.com/ffdav/uploads/getSha1.php?file={}".format("/test/test.txt")).read().decode("utf-8")
     print(remoteSha1)
     
 if __name__ == "__main__":
