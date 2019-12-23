@@ -14,10 +14,10 @@ import daver
 from easyhash import getSha1
 from updateBBS import updateBBS
 from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDiffAndExit,IsRemoteArchiveExists,getChangeLog,getFileCount
-
+from collections import Counter
 
 APPNAME = 'distSolution'
-VERSION = '1.2.2';
+VERSION = '1.2.3';
 APPDISC = 'check files and archive them'
 
 # global config
@@ -203,6 +203,16 @@ def build(solution,target):
     print(args)
     subprocess.check_call(args)
 
+def checkArchivingDir(archivingfull, outdirsfull):
+    ''' archivingfull must constans dirs only '''
+    # traverse root directory, and list directories as dirs and files as files
+    dirs = os.listdir(archivingfull)
+    dirsfull = [os.path.join(archivingfull,dir) for dir in dirs]
+    # compare efficiently
+    if Counter(dirsfull) != Counter(outdirsfull):
+        myexit('archivingdir is not equal to outdirs')
+
+
 # def getSolutionFile(solutionDir):
 #     '''get *.sln from dir'''
 #     fs = glob.glob(os.path.join(solutionDir,"*.sln"))
@@ -246,13 +256,43 @@ def main():
         nargs='?',
         action="store",
         help="Set current directory.")
+    parser.add_argument(
+        "--skip-build",
+        action="store_true",
+        help="skip build process"
+    )
+    parser.add_argument(
+        "--skip-check",
+        action="store_true",
+        help="skip check process"
+    )
+    parser.add_argument(
+        "--skip-archive",
+        action="store_true",
+        help="skip archive process"
+    )
+    parser.add_argument(
+        "--skip-upload",
+        action="store_true",
+        help="skip upload process"
+    )
+    parser.add_argument(
+        "--skip-hashcheck",
+        action="store_true",
+        help="skip hashcheck process"
+    )
+    parser.add_argument(
+        "--skip-bbs",
+        action="store_true",
+        help="skip bbs process"
+    )
     parser.add_argument('main')
     
-    args = parser.parse_args()
-    if args.C:
-        os.chdir(args.C)
+    commandargs = parser.parse_args()
+    if commandargs.C:
+        os.chdir(commandargs.C)
 
-    distFile = args.main
+    distFile = commandargs.main
     
     global configs    
     
@@ -266,16 +306,17 @@ def main():
     verstring="";
     
     # build first
-    for target in configs['targets']:
-        build(solutionFile, target)
+    if not commandargs.skip_build:
+        for target in configs['targets']:
+            build(solutionFile, target)
 
-    # check        
+    # check      
     for target in configs['targets']:
-        checkTarget(target)
+        if not commandargs.skip_check: 
+            checkTarget(target)
         vstT = getVersionString(target)
         if(verstring and verstring != vstT):
             myexit("different is verstion in 32 and 64.")
-
         verstring = vstT
         
 
@@ -288,78 +329,88 @@ def main():
 
     archiveexe = "{}-{}{}".format(configs["name"], verstring, ".exe")
     archiveexefull = os.path.join(configs["archivedir"], archiveexe)
-    if isfile(archiveexefull):
-        myexit('{} already exists, remove it first.'.format(archiveexefull))
+    if not commandargs.skip_archive:
+        if isfile(archiveexefull):
+            myexit('{} already exists, remove it first.'.format(archiveexefull))
      
     urlfull = configs['remotedir'] + archiveexe
-    if IsRemoteArchiveExists(urlfull):
-        myexit('{} already exists'.format(urlfull))
+    if not commandargs.skip_upload:
+        if IsRemoteArchiveExists(urlfull):
+            myexit('{} already exists'.format(urlfull))
     
                
-
-    print("==== creating arhive {} ====".format(archiveexefull))
-#    if(os.path.exists(archiveexefull)):
-#        print("{} already exists. Remove it first.".format(archiveexefull))
-#        myexit(1)
-    args = [
-        r"C:/LegacyPrograms/7-Zip/7z.exe",
-        "a",
-        "-sfx7z.sfx",
-        archiveexefull,
-    ]
-    
-    if 'archivingdir' in configs:
-        # todo: check the archivingdir only contains outdirs
-        args.append(os.path.abspath(configs['archivingdir']))
-    else:
-        # no duplicate in args
-        addedtarget=[]
-        for t in configs['targets']:
-            outdir = t['outdir']
-            if outdir not in addedtarget:
-                outdirfull = os.path.abspath(outdir)
-                args.append(outdirfull)
-            addedtarget.append(outdir)
+    if not commandargs.skip_archive:
+        print("==== creating arhive {} ====".format(archiveexefull))
+        args7z = [
+            r"C:/LegacyPrograms/7-Zip/7z.exe",
+            "a",
+            "-sfx7z.sfx",
+            archiveexefull,
+        ]
         
-    args.append("-mx9");
-    
-    print(args)
-    subprocess.check_call(args)
+        if 'archivingdir' in configs:
+            # check the archivingdir only contains outdirs
+            archivingfull = os.path.abspath(configs['archivingdir'])
+            outdirsfull = []
+            for target in configs['targets']:
+                outdirsfull.append(os.path.abspath(target['outdir']))
+            checkArchivingDir(archivingfull, outdirsfull)
+
+            args7z.append(archivingfull)
+        else:
+            # no duplicate in args7z
+            addedtarget=[]
+            for t in configs['targets']:
+                outdir = t['outdir']
+                if outdir not in addedtarget:
+                    outdirfull = os.path.abspath(outdir)
+                    args7z.append(outdirfull)
+                addedtarget.append(outdir)
+            
+        args7z.append("-mx9");
+        
+        print(args7z)
+        subprocess.check_call(args7z)
+
+
 
     # upload
-    print("==== Uploading to {}... ====".format(configs["remotedir"]))
-    daver.dupload(configs["remotedir"], archiveexefull)
-    print("Uploaded to {}".format(configs["remotedir"]))
+    if not commandargs.skip_upload:
+        print("==== Uploading to {}... ====".format(configs["remotedir"]))
+        daver.dupload(configs["remotedir"], archiveexefull)
+        print("Uploaded to {}".format(configs["remotedir"]))
     
     
-    print("==== Compute sha1 and compare... ====")
-    localSha1 = getSha1(archiveexefull)
-    remoteSha1Url = configs["remotesha1"].format(archiveexe)
+    if not commandargs.skip_hashcheck:
+        print("==== Compute sha1 and compare... ====")
+        localSha1 = getSha1(archiveexefull)
+        remoteSha1Url = configs["remotesha1"].format(archiveexe)
 
-    for loop in range(100):
-        try:
-            remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
-            break
-        except:
-            print("failed {} times to check remote Sha1. Will try again after waiting 5 seconds.".format(loop+1))
-            time.sleep(5) # wait 5 seconds
-    
-    if localSha1.lower() != remoteSha1.lower():
-        myexit("sha1 not equal ({} != {}".format(localSha1, remoteSha1))
+        for loop in range(100):
+            try:
+                remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
+                break
+            except:
+                print("failed {} times to check remote Sha1. Will try again after waiting 5 seconds.".format(loop+1))
+                time.sleep(5) # wait 5 seconds
         
-    print("sha1 check succeed ({})".format(localSha1))
+        if localSha1.lower() != remoteSha1.lower():
+            myexit("sha1 not equal ({} != {}".format(localSha1, remoteSha1))
+            
+        print("sha1 check succeed ({})".format(localSha1))
     
 
     ## update BBS
-    print("==== Updating BBS... ====")
-    historyFull = os.path.join(configs['targets'][0]['outdir'],
-                               configs['obtainverfrom'])
-    versionReg = configs['obtainverregex']
-    print(updateBBS( configs['name'], 
-                     verstring, 
-                     configs["remotedir"] + archiveexe,
-                     getChangeLog(historyFull, versionReg)
-                     ))
+    if not commandargs.skip_bbs:
+        print("==== Updating BBS... ====")
+        historyFull = os.path.join(configs['targets'][0]['outdir'],
+                                configs['obtainverfrom'])
+        versionReg = configs['obtainverregex']
+        print(updateBBS( configs['name'], 
+                        verstring, 
+                        configs["remotedir"] + archiveexe,
+                        getChangeLog(historyFull, versionReg)
+                        ))
     
 
     ######################
