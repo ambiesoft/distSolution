@@ -309,6 +309,7 @@ def main():
     ]
     
     if 'archivingdir' in configs:
+        # todo: check the archivingdir only contains outdirs
         args.append(os.path.abspath(configs['archivingdir']))
     else:
         # no duplicate in args
