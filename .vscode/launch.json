@@ -16,8 +16,8 @@
                 "--skip-upload",
                 "--skip-hashcheck",
                 "--skip-bbs",
-                "-C", "C:/local/msys2/home/afTvber/gitdev/junctor", 
-                "C:/local/msys2/home/afTvber/gitdev/junctor/dist.json"],
+                "-C", "C:\\Cygwin\\home\\joiew3aje\\gitdev\\amblib", 
+                "C:\\Cygwin\\home\\joiew3aje\\gitdev\\amblib\\dist.json"],
             "console": "integratedTerminal"
         }
     ]
