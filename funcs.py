@@ -20,7 +20,7 @@ def getPathDiffs(first, second):
 
 def getFileListAsFullPath(outdir):
     f = []
-    for (dirpath, dirnames, filenames) in os.walk(outdir):
+    for (dirpath, _, filenames) in os.walk(outdir):
       for name in filenames:
         f.append(os.path.realpath( os.path.join(dirpath, name)))
 
@@ -38,7 +38,7 @@ def myexit(message, retval=1):
 def showDiffAndExit(outdir, shouldBeFull, shouldTotal, exact):
     
     current = getFileListAsFullPath(outdir)
-    (targetOver, listOver) = getPathDiffs(shouldBeFull,current);
+    (targetOver, listOver) = getPathDiffs(shouldBeFull,current)
     
     message = ''
     if(targetOver):
@@ -59,7 +59,7 @@ def showDiffAndExit(outdir, shouldBeFull, shouldTotal, exact):
         
 def IsRemoteArchiveExists(url):
     
-    request = urllib.request.Request(url);
+    request = urllib.request.Request(url)
     request.get_method = lambda : 'HEAD'
     
     status = 0

@@ -5,16 +5,16 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{d8d94c7b-4ec9-4782-91e0-ea0e1102ff5e}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>distqt.py</StartupFile>
+    <StartupFile>distSolution.py</StartupFile>
     <SearchPath />
-    <WorkingDirectory>C:\local\msys2\home\kineko\gitdev\SceneExplorer</WorkingDirectory>
+    <WorkingDirectory>C:\cygwin\home\baJofew\gitdev\larmoji</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>src\SceneExplorer.pro -distdir "C:\Linkout\SceneExplorer" -qtroot C:\local\Qt -qtversion 5.11.0 -qtversiontools mingw53_32 -distfile dist.json -make mingw32-make.exe -path C:\local\Qt\Tools\mingw530_32\bin</CommandLineArguments>
+    <CommandLineArguments>C:\cygwin\home\baJofew\gitdev\larmoji\dist.json</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>Global|VisualStudio|Python 3.5</InterpreterId>
+    <InterpreterId>Global|PythonCore|3.8</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -31,13 +31,19 @@
     <Compile Include="easywebdav\client.py" />
     <Compile Include="easywebdav\__init__.py" />
     <Compile Include="easywebdav\__version__.py" />
+    <Compile Include="funcs.py" />
+    <Compile Include="preinstall.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test.py" />
+    <Compile Include="updateBBS.py" />
     <Compile Include="__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="easywebdav" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|VisualStudio|Python 3.5" />
+    <InterpreterReference Include="Global|PythonCore|3.8" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
 </Project>

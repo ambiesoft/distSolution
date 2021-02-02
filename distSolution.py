@@ -1,3 +1,4 @@
+import preinstall
 import sys
 import os
 from os.path import isfile, isdir
@@ -17,7 +18,7 @@ from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDi
 from collections import Counter
 
 APPNAME = 'distSolution'
-VERSION = '1.2.3';
+VERSION = '1.2.3'
 APPDISC = 'check files and archive them'
 
 # global config

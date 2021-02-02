@@ -13,7 +13,7 @@ def myexit(message):
     
 def buildShouldBeFilesObsoletes(dir):
     results = []
-    for (dirpath, dirnames, filenames) in walk(dir):
+    for (dirpath, _, filenames) in walk(dir):
         for fileName in filenames:
             relDir = relpath(dirpath, dir)
             if relDir == '.':
@@ -36,7 +36,7 @@ def buildShouldBeFilesObsoletes(dir):
 
 def buildShouldBeFiles(builtDir):
     results = []
-    for (dirpath, dirnames, filenames) in walk(builtDir):
+    for (dirpath, _, filenames) in walk(builtDir):
         for fileName in filenames:
             relDir = relpath(dirpath, builtDir)
             if relDir == '.':

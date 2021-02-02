@@ -57,7 +57,7 @@ class DistConfig:
             oneofthem = False
             for f in shouldone:
                 fullpath = distDir+f
-                if(isfile(fullpath)):
+                if(os.path.isfile(fullpath)):
                     if(oneofthem):
                         myexit(fullpath + " One of them files duplicating.")
                         return False
@@ -136,7 +136,7 @@ class DistConfig:
         return self.archiveFull
 
     def createArchive(self, path7z, targetdir, verstring):
-        configs = self.configs
+        # configs = self.configs
         
         archiveexefull = self.getArchiveFull(verstring)
         if os.path.isfile(archiveexefull):
@@ -148,10 +148,9 @@ class DistConfig:
             "-sfx7z.sfx",
             archiveexefull,
             targetdir,
-            
         ]
         
-        args.append("-mx9");
+        args.append("-mx9")
         
         print(args)
         subprocess.check_call(args)

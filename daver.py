@@ -1,3 +1,4 @@
+import preinstall
 import easywebdav
 import os
 from urllib.parse import urlparse

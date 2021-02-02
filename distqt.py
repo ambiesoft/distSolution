@@ -70,7 +70,7 @@ class QtTools:
         if not os.path.isdir(q):
             myexit("{} is not found.".format(q))
 
-        return q;
+        return q
 
 
     def translationsDir(self):
@@ -91,7 +91,7 @@ class QtTools:
                 
                 
                 
-def myexit(message):
+def myexit_obsolete(message):
     print(message)
     exit(1)
 
@@ -284,7 +284,7 @@ def main():
     
     # copy qt translation files
     print("==== copy translations of Qt ====")
-    desttransdir = os.path.join(distdir, 'translations');
+    desttransdir = os.path.join(distdir, 'translations')
     if not os.path.isdir(desttransdir):
         os.mkdir(desttransdir)
         if not os.path.isdir(desttransdir):
