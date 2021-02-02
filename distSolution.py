@@ -250,7 +250,7 @@ def main():
     
     parser = ArgumentParser(
         prog="distSolution",
-        description="Build Qt Project")
+        description="Build VS Project")
         
     parser.add_argument(
         "-C",
@@ -317,17 +317,11 @@ def main():
             checkTarget(target)
         vstT = getVersionString(target)
         if(verstring and verstring != vstT):
-            myexit("different is verstion in 32 and 64.")
+            myexit("different is verstion between targets.")
         verstring = vstT
         
 
-#     target = targets[0];
-#     outdir=target['outdir']
-#     parentDir = os.path.abspath(os.path.join(outdir, os.pardir))
-#     dirName = os.path.basename(os.path.dirname(outdir))
-
     #archive it
-
     archiveexe = "{}-{}{}".format(configs["name"], verstring, ".exe")
     archiveexefull = os.path.join(configs["archivedir"], archiveexe)
     if not commandargs.skip_archive:
