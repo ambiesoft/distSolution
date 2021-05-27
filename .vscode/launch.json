@@ -16,8 +16,8 @@
                 "--skip-upload",
                 "--skip-hashcheck",
                 "--skip-bbs",
-                "-C", "C:\\Cygwin\\home\\joiew3aje\\gitdev\\amblib", 
-                "C:\\Cygwin\\home\\joiew3aje\\gitdev\\amblib\\dist.json"],
+                "-C", "K:/local/msys2/home/hkIurwvKj/gitdev/cnote/src", 
+                "K:/local/msys2/home/hkIurwvKj/gitdev/cnote/src/dist.json"],
             "console": "integratedTerminal"
         }
     ]

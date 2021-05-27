@@ -2,6 +2,5 @@
     "files.eol": "\n",
     "terminal.integrated.env.windows": {
         "PATH": "${env:PATH};C:\\local\\python3\\python.exe"
-    },
-    "python.pythonPath": "C:\\local\\python3\\python.exe"
+    }
 }
