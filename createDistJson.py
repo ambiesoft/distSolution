@@ -105,7 +105,7 @@ def main():
     results["ShouldBeOneOfThem"]=[]
     
     results["obtainverfrom"]= "history.txt"
-    results["obtainverregex"]= "\\d+\\.\\d+"
+    results["obtainverregex"]= "\\d+\\.\\d+\\.\\d+"
 
     jsonStr = json.dumps(results,ensure_ascii=False, indent=4, sort_keys=False, separators=(',', ': '))
 

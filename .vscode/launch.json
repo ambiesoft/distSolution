@@ -16,8 +16,8 @@
                 "--skip-upload",
                 "--skip-hashcheck",
                 "--skip-bbs",
-                "-C", "K:/local/msys2/home/hkIurwvKj/gitdev/cnote/src", 
-                "K:/local/msys2/home/hkIurwvKj/gitdev/cnote/src/dist.json"],
+                "-C", "C:\\local\\msys2\\home\\hkIurwvKj\\gitdev\\closeapp\\", 
+                "C:\\local\\msys2\\home\\hkIurwvKj\\gitdev\\closeapp\\dist.json"],
             "console": "integratedTerminal"
         }
     ]
