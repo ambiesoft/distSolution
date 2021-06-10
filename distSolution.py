@@ -134,10 +134,26 @@ def getMsBuildExe2(pf, vsvar):
                 return pf
     return None
  
-def getMsBuildExe(solution):
+def getDevenvExeOrCom2(pf, vsvar, ext):
+    if pf:
+        if vsvar==12:
+            pf = os.path.join(pf, R"Microsoft Visual Studio 12.0\Common7\IDE\devenv" + ext)
+            if isfile(pf):
+                return pf
+        # elif vsvar==15:
+        #     pf = os.path.join(pf, R"Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe")
+        #     if isfile(pf):
+        #         return pf
+        elif vsvar==16:
+            pf = os.path.join(pf, R"Microsoft Visual Studio\2019\Community\Common7\IDE\devenv" + ext)
+            if isfile(pf):
+                return pf
+    return None
+ 
+def getVsVerFromSln(sln):
     vsvar = 0
     # Get VS version from solution file
-    with open(solution, "r", encoding="utf-8") as f:
+    with open(sln, "r", encoding="utf-8") as f:
         lines=f.readlines()
         for line in lines:
             vsvermatch = re.search('VisualStudioVersion\\s=\\s(?P<topver>\\d+)',line)
@@ -156,7 +172,11 @@ def getMsBuildExe(solution):
                 print ("solution is for Visual Studio 2019")
                 vsvar=16
                 break
-                
+    return vsvar
+
+def getMsBuildExe(solution):
+    vsvar = getVsVerFromSln(solution)
+
     if not vsvar:
         myexit('Could not find VS version from solution')
 
@@ -165,6 +185,22 @@ def getMsBuildExe(solution):
         return pf
     
     pf = getMsBuildExe2(getenv("ProgramFiles(x86)"),vsvar)      
+    if pf and isfile(pf):
+        return pf
+
+    return None
+
+def getDevenvExeOrCom(solution, ext='.com'):
+    vsvar = getVsVerFromSln(solution)
+
+    if not vsvar:
+        myexit('Could not find VS version from solution')
+
+    pf = getDevenvExeOrCom2(getenv("ProgramFiles"),vsvar,ext)
+    if pf and isfile(pf):
+        return pf
+    
+    pf = getDevenvExeOrCom2(getenv("ProgramFiles(x86)"),vsvar,ext)      
     if pf and isfile(pf):
         return pf
 
