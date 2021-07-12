@@ -16,8 +16,8 @@
                 "--skip-upload",
                 "--skip-hashcheck",
                 "--skip-bbs",
-                "-C", "C:/cygwin/home/baJofew/gitdev/DirNotify/", 
-                "C:/cygwin/home/baJofew/gitdev/DirNotify/dist.json"],
+                "-C", "C:/local/msys2/home/hkIurwvKj/gitdev/DirNotify/", 
+                "C:/local/msys2/home/hkIurwvKj/gitdev/DirNotify/dist.json"],
             "console": "integratedTerminal"
         }
     ]

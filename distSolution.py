@@ -274,6 +274,7 @@ distConfig is json file, see the following expamle
    
 def getGitHash(gitdir, git):
     ''' get hash from dir'''
+
     args = [git, '-C', gitdir, 'rev-parse', 'HEAD']
     print(args)
     hash = subprocess.check_output(args).decode('utf-8').strip()
@@ -290,7 +291,15 @@ def createGitRev(gitrev):
     if not gitrev['outheader']:
         exit('"outheader" must be specified in "gitrev"')
     
-    git = gitrev['git'] if gitrev['git'] else 'git'
+    # find git executable
+    for g in gitrev['gits'] if gitrev['gits'] else ['git']:
+        if not os.path.isfile(g):
+            continue
+        git = g
+        break
+    if not git:
+        git = 'git'
+    
     gitrevheader = open(gitrev['outheader'], 'w')
     if not gitrevheader:
         exit('Failed to open', gitrev['outheader'])
