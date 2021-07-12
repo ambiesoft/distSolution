@@ -18,17 +18,11 @@ from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDi
 from collections import Counter
 
 APPNAME = 'distSolution'
-VERSION = '1.2.3'
+VERSION = '1.2.4'
 APPDISC = 'check files and archive them'
 
 # global config
 configs = {}
-
-
- 
-
-
-
 
 def checkShouldnotExistFile(distDir, shouldnot):
     """ Return false if a file that should not be distributed exists. """
@@ -278,6 +272,66 @@ distConfig is json file, see the following expamle
 }
 """
    
+def getGitHash(gitdir, git):
+    ''' get hash from dir'''
+    args = [git, '-C', gitdir, 'rev-parse', 'HEAD']
+    print(args)
+    hash = subprocess.check_output(args).decode('utf-8').strip()
+    if len(hash) != 40:
+        exit('hex digits of hash is not 40')
+    return hash
+
+def createGitRev(gitrev):
+    ''' create or change gitrev.h from git hash '''
+    if not gitrev:
+        return
+    if not gitrev['gitdirs']:
+        exit('"gitdirs" must be specified in "gitrev"')
+    if not gitrev['outheader']:
+        exit('"outheader" must be specified in "gitrev"')
+    
+    git = gitrev['git'] if gitrev['git'] else 'git'
+    gitrevheader = open(gitrev['outheader'], 'w')
+    if not gitrevheader:
+        exit('Failed to open', gitrev['outheader'])
+    gitrevheader.write('// DO NOT EDIT\n')
+    gitrevheader.write('// This file is created and will be overwritten by distSolution.py.\n')
+    gitrevheader.write('// DO NOT EDIT\n')
+
+    namehash = []
+    for gitdir in gitrev['gitdirs']:
+        dir = os.path.basename(os.path.abspath(gitdir)).replace('.','').replace('/','').replace('\\','')
+        if not dir:
+            exit('dir is empty')
+        hash = getGitHash(gitdir, git)
+        namehash.append([dir,hash])
+
+    insidemap = ''
+    for nh in namehash:
+        insidemap += '{"' + nh[0] +  '","' + nh[1] + '"},\n'
+
+    gitrevheader.write(
+'''
+#ifndef GITREV_INCLUDED_
+#define GITREV_INCLUDED_
+
+#include <map>
+#include <string>
+namespace GITREV {
+	inline std::map<std::string, std::string> GetHashes()
+	{
+		std::map<std::string, std::string> ret{
+'''
++ insidemap + 
+'''
+		};
+		return ret;
+	}
+}
+#endif''')
+
+    gitrevheader.close()
+
 def main():
     if sys.version_info[0] < 3:
         myexit("Please use python3" + sys.version)
@@ -336,10 +390,11 @@ def main():
     print("Opening input {}".format(distFile))
     with open(distFile,encoding="utf-8") as data_file:
         configs = json.load(data_file)
-          
+
+    # create gitrev.h if specified          
+    createGitRev(configs['gitrev'])
 
     solutionFile = os.path.join(os.path.dirname(distFile), configs["solution"])
-    
     verstring="";
     
     # build first
