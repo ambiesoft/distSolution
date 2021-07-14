@@ -16,8 +16,10 @@
                 "--skip-upload",
                 "--skip-hashcheck",
                 "--skip-bbs",
-                "-C", "C:/local/msys2/home/hkIurwvKj/gitdev/DirNotify/", 
-                "C:/local/msys2/home/hkIurwvKj/gitdev/DirNotify/dist.json"],
+                "--show-dummygitrev",
+                // "-C", "C:/local/msys2/home/hkIurwvKj/gitdev/DirNotify/", 
+                "C:/local/msys2/home/hkIurwvKj/gitdev/DirNotify/dist.json"
+            ],
             "console": "integratedTerminal"
         }
     ]

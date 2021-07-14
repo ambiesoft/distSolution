@@ -282,38 +282,47 @@ def getGitHash(gitdir, git):
         exit('hex digits of hash is not 40')
     return hash
 
-def createGitRev(gitrev):
+def createGitRev(gitrev, ShowDummy=False):
     ''' create or change gitrev.h from git hash '''
-    if not gitrev:
-        return
-    if not gitrev['gitdirs']:
-        exit('"gitdirs" must be specified in "gitrev"')
-    if not gitrev['outheader']:
-        exit('"outheader" must be specified in "gitrev"')
+    if not ShowDummy:
+        if not gitrev:
+            return
+        if not gitrev['gitdirs']:
+            exit('"gitdirs" must be specified in "gitrev"')
+        if not gitrev['outheader']:
+            exit('"outheader" must be specified in "gitrev"')
     
-    # find git executable
-    for g in gitrev['gits'] if gitrev['gits'] else ['git']:
-        if not os.path.isfile(g):
-            continue
-        git = g
-        break
-    if not git:
-        git = 'git'
-    
-    gitrevheader = open(gitrev['outheader'], 'w')
-    if not gitrevheader:
-        exit('Failed to open', gitrev['outheader'])
+        # find git executable
+        for g in gitrev['gits'] if gitrev['gits'] else ['git']:
+            if not os.path.isfile(g):
+                continue
+            git = g
+            break
+        if not git:
+            git = 'git'
+
+    if ShowDummy:
+        gitrevheader = sys.stdout;
+        if not gitrevheader:
+            exit('Failed to open stdout')    
+    else:
+        gitrevheader = open(gitrev['outheader'], 'w')
+        if not gitrevheader:
+            exit('Failed to open', gitrev['outheader'])
     gitrevheader.write('// DO NOT EDIT\n')
     gitrevheader.write('// This file is created and will be overwritten by distSolution.py.\n')
     gitrevheader.write('// DO NOT EDIT\n')
 
     namehash = []
-    for gitdir in gitrev['gitdirs']:
-        dir = os.path.basename(os.path.abspath(gitdir)).replace('.','').replace('/','').replace('\\','')
-        if not dir:
-            exit('dir is empty')
-        hash = getGitHash(gitdir, git)
-        namehash.append([dir,hash])
+    if ShowDummy:
+        namehash.append(['dummy', '0'*40])
+    else:
+        for gitdir in gitrev['gitdirs']:
+            dir = os.path.basename(os.path.abspath(gitdir)).replace('.','').replace('/','').replace('\\','')
+            if not dir:
+                exit('dir is empty')
+            hash = getGitHash(gitdir, git)
+            namehash.append([dir,hash])
 
     insidemap = ''
     for nh in namehash:
@@ -337,9 +346,11 @@ namespace GITREV {
 		return ret;
 	}
 }
-#endif''')
+#endif  // GITREV_INCLUDED_
+''')
 
-    gitrevheader.close()
+    if gitrevheader != sys.stdout:
+        gitrevheader.close()
 
 def main():
     if sys.version_info[0] < 3:
@@ -386,14 +397,22 @@ def main():
         action="store_true",
         help="skip bbs process"
     )
+    parser.add_argument(
+        "--show-dummygitrev",
+        action="store_true",
+        help="show c++ gitrev code. This can be use for the first code."
+    )
     parser.add_argument('main')
     
     commandargs = parser.parse_args()
     if commandargs.C:
         os.chdir(commandargs.C)
 
+    if commandargs.show_dummygitrev:
+        createGitRev(None, ShowDummy=True)
+        exit(0)
+
     distFile = commandargs.main
-    
     global configs    
     
     print("Opening input {}".format(distFile))
