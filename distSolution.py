@@ -19,7 +19,7 @@ from collections import Counter
 
 APPNAME = 'distSolution'
 VERSION = '1.2.4'
-APPDISC = 'check files and archive them'
+APPDISC = 'build, check files, archive them and distribute solution'
 
 # global config
 configs = {}
@@ -310,7 +310,7 @@ def createGitRev(gitrev, ShowDummy=False, Char='char'):
         if not gitrevheader:
             exit('Failed to open', gitrev['outheader'])
     gitrevheader.write('// DO NOT EDIT\n')
-    gitrevheader.write('// This file is created and will be overwritten by distSolution.py.\n')
+    gitrevheader.write('// This file was created and will be overwritten by distSolution.py.\n')
     gitrevheader.write('// DO NOT EDIT\n')
 
     namehash = []
@@ -428,7 +428,6 @@ def main():
         action="store_true",
         help="show c++ gitrev code in wchar_t. This can be use for the first code."
     )
-    parser.add_argument('main')
     
     commandargs = parser.parse_args()
     if commandargs.C:
@@ -441,15 +440,30 @@ def main():
         createGitRev(None, ShowDummy=True)
         exit(0)
 
-    distFile = commandargs.main
     global configs    
     
-    print("Opening input {}".format(distFile))
-    with open(distFile,encoding="utf-8") as data_file:
-        configs = json.load(data_file)
+    if sys.stdin.isatty():
+        # read from file
+        # parser does not allow main arguments to omit( required=False is rejected)
+        # so parse it again with main now
+        parser.add_argument(
+            'jsonfile',
+            required=False)
+        commandargs = parser.parse_args()
+        distFile = commandargs.jsonfile
+        print("Opening input {}".format(distFile))
+        with open(distFile,encoding="utf-8") as data_file:
+            configs = json.load(data_file)
+    else:
+        # read from pipe
+        configs = json.load(sys.stdin)
 
     # create gitrev.h if specified          
-    createGitRev(configs['gitrev'])
+    if 'gitrev' in configs:
+        createGitRev(configs['gitrev'])
+
+    if not 'solution' is configs:
+        exit('"solution" is not specifed')
 
     solutionFile = os.path.join(os.path.dirname(distFile), configs["solution"])
     verstring="";
