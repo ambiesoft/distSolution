@@ -282,7 +282,7 @@ def getGitHash(gitdir, git):
         exit('hex digits of hash is not 40')
     return hash
 
-def createGitRev(gitrev, ShowDummy=False):
+def createGitRev(gitrev, ShowDummy=False, Char='char'):
     ''' create or change gitrev.h from git hash '''
     if not ShowDummy:
         if not gitrev:
@@ -324,31 +324,52 @@ def createGitRev(gitrev, ShowDummy=False):
             hash = getGitHash(gitdir, git)
             namehash.append([dir,hash])
 
+    if not ShowDummy and gitrev['char']:
+        Char = gitrev['char']
+    if Char == 'char':
+        cppchar = 'char'
+        cppstring = 'std::string'
+        cppstringstream = 'std::stringstream'
+        literalL = ''
+    elif Char == 'wchar':
+        cppchar = 'wchar_t'
+        cppstring = 'std::wstring'
+        cppstringstream = 'std::wstringstream'
+        literalL = 'L'
+    else:
+        exit('Char must be char or wchar')
+
     insidemap = ''
     for nh in namehash:
-        insidemap += '{"' + nh[0] +  '","' + nh[1] + '"},\n'
+        insidemap += '{' + literalL + '"' + nh[0] +  '",' + literalL + '"' + nh[1] + '"},\n'
 
-    gitrevheader.write(
-'''
+    code = ('''
 #ifndef GITREV_INCLUDED_
 #define GITREV_INCLUDED_
 
-#include <map>
 #include <string>
+#include <sstream>
 namespace GITREV {
-	inline std::map<std::string, std::string> GetHashes()
-	{
-		std::map<std::string, std::string> ret{
+    static constexpr %(cppchar)s *hashes[][2] =  {
 '''
-+ insidemap + 
-'''
-		};
-		return ret;
+    + insidemap + '''
+	};
+	inline %(cppstring)s GetHashMessage() {
+		%(cppstringstream)s message;
+		for (auto&& s : hashes)
+			message << s[0] << %(literalL)s"=" << s[1] << std::endl;
+		return message.str();
 	}
-}
+}  // namespace GITREV
 #endif  // GITREV_INCLUDED_
-''')
+''') % {
+    'cppchar': cppchar,
+    'cppstring': cppstring,
+    'cppstringstream': cppstringstream,
+    'literalL': literalL,
+}
 
+    gitrevheader.write(code)
     if gitrevheader != sys.stdout:
         gitrevheader.close()
 
@@ -400,7 +421,12 @@ def main():
     parser.add_argument(
         "--show-dummygitrev",
         action="store_true",
-        help="show c++ gitrev code. This can be use for the first code."
+        help="show c++ gitrev code in char. This can be use for the first code."
+    )
+    parser.add_argument(
+        "--show-dummygitrev-wchar",
+        action="store_true",
+        help="show c++ gitrev code in wchar_t. This can be use for the first code."
     )
     parser.add_argument('main')
     
@@ -408,6 +434,9 @@ def main():
     if commandargs.C:
         os.chdir(commandargs.C)
 
+    if commandargs.show_dummygitrev_wchar:
+        createGitRev(None, ShowDummy=True, Char='wchar')
+        exit(0)
     if commandargs.show_dummygitrev:
         createGitRev(None, ShowDummy=True)
         exit(0)

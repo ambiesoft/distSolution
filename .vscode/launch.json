@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "distSolution",
             "type": "python",
@@ -16,7 +17,25 @@
                 "--skip-upload",
                 "--skip-hashcheck",
                 "--skip-bbs",
-                "--show-dummygitrev",
+                // "--show-dummygitrev-wchar",
+                "-C", "C:/local/msys2/home/hkIurwvKj/gitdev/kocchiwork/", 
+                "C:/local/msys2/home/hkIurwvKj/gitdev/kocchiwork/dist.json"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "playground",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/playground.py",
+            "args": [
+                // "--skip-build", 
+                // "--skip-check",
+                // "--skip-archive",
+                "--skip-upload",
+                "--skip-hashcheck",
+                "--skip-bbs",
+                "--show-dummygitrev-wchar",
                 // "-C", "C:/local/msys2/home/hkIurwvKj/gitdev/DirNotify/", 
                 "C:/local/msys2/home/hkIurwvKj/gitdev/DirNotify/dist.json"
             ],
