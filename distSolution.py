@@ -282,15 +282,15 @@ def getGitHash(gitdir, git):
         exit('hex digits of hash is not 40')
     return hash
 
-def createGitRev(gitrev, ShowDummy=False, Char='char'):
+def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
     ''' create or change gitrev.h from git hash '''
     if not ShowDummy:
         if not gitrev:
             return
         if not gitrev['gitdirs']:
             exit('"gitdirs" must be specified in "gitrev"')
-        if not gitrev['outheader']:
-            exit('"outheader" must be specified in "gitrev"')
+        if not gitrev['outheader'] and not gitrev['outtxt']:
+            exit('"outheader" or "outtxt" must be specified in "gitrev"')
     
         # find git executable
         for g in gitrev['gits'] if gitrev['gits'] else ['git']:
@@ -301,18 +301,7 @@ def createGitRev(gitrev, ShowDummy=False, Char='char'):
         if not git:
             git = 'git'
 
-    if ShowDummy:
-        gitrevheader = sys.stdout;
-        if not gitrevheader:
-            exit('Failed to open stdout')    
-    else:
-        gitrevheader = open(gitrev['outheader'], 'w')
-        if not gitrevheader:
-            exit('Failed to open', gitrev['outheader'])
-    gitrevheader.write('// DO NOT EDIT\n')
-    gitrevheader.write('// This file was created and will be overwritten by distSolution.py.\n')
-    gitrevheader.write('// DO NOT EDIT\n')
-
+    # get hashes from git
     namehash = []
     if ShowDummy:
         namehash.append(['dummy', '0'*40])
@@ -324,6 +313,7 @@ def createGitRev(gitrev, ShowDummy=False, Char='char'):
             hash = getGitHash(gitdir, git)
             namehash.append([dir,hash])
 
+    # decide char or wchar
     if not ShowDummy and gitrev['char']:
         Char = gitrev['char']
     if Char == 'char':
@@ -339,39 +329,72 @@ def createGitRev(gitrev, ShowDummy=False, Char='char'):
     else:
         exit('Char must be char or wchar')
 
-    insidemap = ''
-    for nh in namehash:
-        insidemap += '{' + literalL + '"' + nh[0] +  '",' + literalL + '"' + nh[1] + '"},\n'
+    if (gitrev and 'outheader' in gitrev) or (ShowDummy and DummyType=='cpp'):
+        if ShowDummy:
+            gitrevheader = sys.stdout;
+            if not gitrevheader:
+                exit('Failed to open stdout')    
+        else:
+            gitrevheader = open(gitrev['outheader'], 'w')
+            if not gitrevheader:
+                exit('Failed to open', gitrev['outheader'])
+        gitrevheader.write('// DO NOT EDIT\n')
+        gitrevheader.write('// This file was created and will be overwritten by distSolution.py.\n')
+        gitrevheader.write('// DO NOT EDIT\n')
 
-    code = ('''
-#ifndef GITREV_INCLUDED_
-#define GITREV_INCLUDED_
 
-#include <string>
-#include <sstream>
-namespace GITREV {
-    static constexpr %(cppchar)s *hashes[][2] =  {
-'''
-    + insidemap + '''
-	};
-	inline %(cppstring)s GetHashMessage() {
-		%(cppstringstream)s message;
-		for (auto&& s : hashes)
-			message << s[0] << %(literalL)s"=" << s[1] << std::endl;
-		return message.str();
-	}
-}  // namespace GITREV
-#endif  // GITREV_INCLUDED_
-''') % {
-    'cppchar': cppchar,
-    'cppstring': cppstring,
-    'cppstringstream': cppstringstream,
-    'literalL': literalL,
-}
 
-    gitrevheader.write(code)
-    if gitrevheader != sys.stdout:
-        gitrevheader.close()
+        insidemap = ''
+        for nh in namehash:
+            insidemap += '{' + literalL + '"' + nh[0] +  '",' + literalL + '"' + nh[1] + '"},\n'
+
+        code = ('''
+    #ifndef GITREV_INCLUDED_
+    #define GITREV_INCLUDED_
+
+    #include <string>
+    #include <sstream>
+    namespace GITREV {
+        static constexpr %(cppchar)s *hashes[][2] =  {
+    '''
+        + insidemap + '''
+        };
+        inline %(cppstring)s GetHashMessage() {
+            %(cppstringstream)s message;
+            for (auto&& s : hashes)
+                message << s[0] << %(literalL)s"=" << s[1] << std::endl;
+            return message.str();
+        }
+    }  // namespace GITREV
+    #endif  // GITREV_INCLUDED_
+    ''') % {
+        'cppchar': cppchar,
+        'cppstring': cppstring,
+        'cppstringstream': cppstringstream,
+        'literalL': literalL,
+    }
+
+        gitrevheader.write(code)
+        if gitrevheader != sys.stdout:
+            gitrevheader.close()
+
+    if (gitrev and 'outtxt' in gitrev) or (ShowDummy and DummyType=='txt'):
+        if ShowDummy:
+            gitrevtext = sys.stdout;
+            if not gitrevtext:
+                exit('Failed to open stdout')    
+        else:
+            gitrevtext = open(gitrev['outtxt'], 'w')
+            if not gitrevtext:
+                exit('Failed to open', gitrev['outtxt'])        
+        
+        revtext = ''
+        for nh in namehash:
+            revtext += '%s=%s\n' % (nh[0],nh[1])
+
+        gitrevtext.write(revtext)
+        if gitrevtext != sys.stdout:
+            gitrevtext.close()
 
 def main():
     if sys.version_info[0] < 3:
@@ -428,8 +451,16 @@ def main():
         action="store_true",
         help="show c++ gitrev code in wchar_t. This can be use for the first code."
     )
-    
+    parser.add_argument(
+        "--show-dummygitrev-txt",
+        action="store_true",
+        help="show gitrev text. This can be use for the first dummy output."
+    )
+    parser.add_argument('jsonfile',
+        nargs='?')
+
     commandargs = parser.parse_args()
+
     if commandargs.C:
         os.chdir(commandargs.C)
 
@@ -439,17 +470,15 @@ def main():
     if commandargs.show_dummygitrev:
         createGitRev(None, ShowDummy=True)
         exit(0)
+    if commandargs.show_dummygitrev_txt:
+        createGitRev(None, ShowDummy=True, DummyType='txt')
+        exit(0)
 
     global configs    
     
     if sys.stdin.isatty():
-        # read from file
-        # parser does not allow main arguments to omit( required=False is rejected)
-        # so parse it again with main now
-        parser.add_argument(
-            'jsonfile',
-            required=False)
-        commandargs = parser.parse_args()
+        if not commandargs.jsonfile:
+            exit('No input json file')
         distFile = commandargs.jsonfile
         print("Opening input {}".format(distFile))
         with open(distFile,encoding="utf-8") as data_file:
@@ -462,7 +491,7 @@ def main():
     if 'gitrev' in configs:
         createGitRev(configs['gitrev'])
 
-    if not 'solution' is configs:
+    if not 'solution' in configs:
         exit('"solution" is not specifed')
 
     solutionFile = os.path.join(os.path.dirname(distFile), configs["solution"])
