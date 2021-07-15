@@ -18,8 +18,9 @@
                 "--skip-hashcheck",
                 "--skip-bbs",
                 // "--show-dummygitrev-txt",
+                "--show-dummygitrev",
                 "-C", "C:/local/msys2/home/gr4KOtfs/gitdev/Dicregate/trunk/Dicregate/", 
-                "C:/local/msys2/home/gr4KOtfs/gitdev/Dicregate/trunk/Dicregate/dist.json"
+                // "C:/local/msys2/home/gr4KOtfs/gitdev/Dicregate/trunk/Dicregate/dist.json"
             ],
             "console": "integratedTerminal"
         },

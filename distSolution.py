@@ -282,6 +282,34 @@ def getGitHash(gitdir, git):
         exit('hex digits of hash is not 40')
     return hash
 
+CPPCODEHEAD='''// DO NOT EDIT
+// This file was created and will be overwritten by distSolution.py
+// DO NOT EDIT
+'''
+
+CPPCODEPREV='''
+#ifndef GITREV_INCLUDED_
+#define GITREV_INCLUDED_
+
+#include <string>
+#include <sstream>
+namespace GITREV {
+    static constexpr %(cppchar)s *hashes[][2] =  {
+
+'''
+
+CPPCODEPOST='''
+    };
+    inline %(cppstring)s GetHashMessage() {
+        %(cppstringstream)s message;
+        for (auto&& s : hashes)
+            message << s[0] << %(literalL)s"=" << s[1] << std::endl;
+        return message.str();
+    }
+}  // namespace GITREV
+#endif  // GITREV_INCLUDED_
+'''
+
 def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
     ''' create or change gitrev.h from git hash '''
     if not ShowDummy:
@@ -338,41 +366,19 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
             gitrevheader = open(gitrev['outheader'], 'w')
             if not gitrevheader:
                 exit('Failed to open', gitrev['outheader'])
-        gitrevheader.write('// DO NOT EDIT\n')
-        gitrevheader.write('// This file was created and will be overwritten by distSolution.py.\n')
-        gitrevheader.write('// DO NOT EDIT\n')
-
-
+        
+        gitrevheader.write(CPPCODEHEAD)
 
         insidemap = ''
         for nh in namehash:
             insidemap += '{' + literalL + '"' + nh[0] +  '",' + literalL + '"' + nh[1] + '"},\n'
 
-        code = ('''
-    #ifndef GITREV_INCLUDED_
-    #define GITREV_INCLUDED_
-
-    #include <string>
-    #include <sstream>
-    namespace GITREV {
-        static constexpr %(cppchar)s *hashes[][2] =  {
-    '''
-        + insidemap + '''
-        };
-        inline %(cppstring)s GetHashMessage() {
-            %(cppstringstream)s message;
-            for (auto&& s : hashes)
-                message << s[0] << %(literalL)s"=" << s[1] << std::endl;
-            return message.str();
+        code = (CPPCODEPREV + insidemap + CPPCODEPOST) % {
+            'cppchar': cppchar,
+            'cppstring': cppstring,
+            'cppstringstream': cppstringstream,
+            'literalL': literalL,
         }
-    }  // namespace GITREV
-    #endif  // GITREV_INCLUDED_
-    ''') % {
-        'cppchar': cppchar,
-        'cppstring': cppstring,
-        'cppstringstream': cppstringstream,
-        'literalL': literalL,
-    }
 
         gitrevheader.write(code)
         if gitrevheader != sys.stdout:
@@ -398,9 +404,9 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
 
 def main():
     if sys.version_info[0] < 3:
-        myexit("Please use python3" + sys.version)
+        exit("Please use python3" + sys.version)
         
-    print('{} {} ({})'.format(APPNAME,VERSION,APPDISC))
+    # print('{} {} ({})'.format(APPNAME,VERSION,APPDISC))
     
     parser = ArgumentParser(
         prog="distSolution",
