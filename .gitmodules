@@ -1,0 +1,3 @@
+[submodule "lsPy"]
+	path = lsPy
+	url = git@github.com:ambiesoft/lsPy.git
