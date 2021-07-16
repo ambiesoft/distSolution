@@ -16,6 +16,14 @@ from easyhash import getSha1
 from updateBBS import updateBBS
 from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDiffAndExit,IsRemoteArchiveExists,getChangeLog,getFileCount
 from collections import Counter
+import inspect
+
+# import from parent dir
+# https://stackoverflow.com/a/11158224 By Remi
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+from lsPy import lspy
 
 APPNAME = 'distSolution'
 VERSION = '1.2.4'
@@ -258,16 +266,6 @@ distConfig is json file, see the following expamle
 }
 """
    
-def getGitHash(gitdir, git):
-    ''' get hash from dir'''
-
-    args = [git, '-C', gitdir, 'rev-parse', 'HEAD']
-    print(args)
-    hash = subprocess.check_output(args).decode('utf-8').strip()
-    if len(hash) != 40:
-        exit('hex digits of hash is not 40')
-    return hash
-
 CPPCODEHEAD='''// DO NOT EDIT
 // This file was created and will be overwritten by distSolution.py
 // DO NOT EDIT
@@ -324,7 +322,7 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
             dir = os.path.basename(os.path.abspath(gitdir)).replace('.','').replace('/','').replace('\\','')
             if not dir:
                 exit('dir is empty')
-            hash = getGitHash(gitdir, git)
+            hash = lspy.getGitHash(gitdir, git)
             namehash.append([dir,hash])
 
     # decide char or wchar
@@ -388,18 +386,12 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
         if gitrevtext != sys.stdout:
             gitrevtext.close()
 
-def getExtension(file, IncludeDot=True):
-    ret = os.path.splitext(file)[1]
-    if not IncludeDot:
-        ret = ret.lstrip('.')
-    return ret
-
-def getInputfileType(inputfile):
-    ''' determin inputfile is json or yaml '''
-    ext = getExtension(inputfile, IncludeDot=False)
-    if ext.lower()=='yaml':
-        return 'yaml'
-    return 'json'
+    if gitrev and 'checkcommitted' in gitrev:
+        for gitdir in gitrev['gitdirs']:
+            if not lspy.isGitCommited(gitdir, git):
+                exit('"{}" is not comitted'.format(gitdir))
+            if not lspy.isGitCommited(gitdir,git):
+                exit('"{}" is not committed'.format(gitdir))
 
 def main():
     if sys.version_info[0] < 3:
@@ -485,7 +477,7 @@ def main():
         if not commandargs.inputfile:
             exit('No input input file')
         distFile = commandargs.inputfile
-        filetype = getInputfileType(distFile)
+        filetype = lspy.getInputfileType(distFile)
         print("Opening input {} as {}".format(distFile, filetype))
         with open(distFile,encoding="utf-8") as data_file:
             if filetype=='yaml':
