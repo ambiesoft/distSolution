@@ -45,7 +45,6 @@ def checkShouldBeFiles(distDir, shouldbe):
     return True
 
 def checkShouldOneOfFiles(distDir, shouldone):
-    
     if shouldone:
         oneofthem = False
         for f in shouldone:
@@ -62,12 +61,6 @@ def checkShouldOneOfFiles(distDir, shouldone):
     
     return True
             
-
-
-    
-  
-
-  
 def checkTarget(target):
     global configs
     
@@ -243,13 +236,6 @@ def checkArchivingDir(archivingfull, outdirsfull):
     if Counter(dirsfull) != Counter(outdirsfull):
         myexit('archivingdir is not equal to outdirs')
 
-
-# def getSolutionFile(solutionDir):
-#     '''get *.sln from dir'''
-#     fs = glob.glob(os.path.join(solutionDir,"*.sln"))
-#     
-#     if len(fs) != 1:
-#         myexit('not 1 solution file found ({}).'.format(fs))
         
 HELPSTRING="""
 distSolution distConfig
@@ -402,6 +388,19 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
         if gitrevtext != sys.stdout:
             gitrevtext.close()
 
+def getExtension(file, IncludeDot=True):
+    ret = os.path.splitext(file)[1]
+    if not IncludeDot:
+        ret = ret.lstrip('.')
+    return ret
+
+def getInputfileType(inputfile):
+    ''' determin inputfile is json or yaml '''
+    ext = getExtension(inputfile, IncludeDot=False)
+    if ext.lower()=='yaml':
+        return 'yaml'
+    return 'json'
+
 def main():
     if sys.version_info[0] < 3:
         exit("Please use python3" + sys.version)
@@ -462,7 +461,7 @@ def main():
         action="store_true",
         help="show gitrev text. This can be use for the first dummy output."
     )
-    parser.add_argument('jsonfile',
+    parser.add_argument('inputfile',
         nargs='?')
 
     commandargs = parser.parse_args()
@@ -483,12 +482,17 @@ def main():
     global configs    
     
     if sys.stdin.isatty():
-        if not commandargs.jsonfile:
-            exit('No input json file')
-        distFile = commandargs.jsonfile
-        print("Opening input {}".format(distFile))
+        if not commandargs.inputfile:
+            exit('No input input file')
+        distFile = commandargs.inputfile
+        filetype = getInputfileType(distFile)
+        print("Opening input {} as {}".format(distFile, filetype))
         with open(distFile,encoding="utf-8") as data_file:
-            configs = json.load(data_file)
+            if filetype=='yaml':
+                import yaml
+                configs = yaml.safe_load(data_file)
+            else:
+                configs = json.load(data_file)
     else:
         # read from pipe
         configs = json.load(sys.stdin)
