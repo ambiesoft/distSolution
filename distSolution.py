@@ -18,11 +18,6 @@ from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDi
 from collections import Counter
 import inspect
 
-# import from parent dir
-# https://stackoverflow.com/a/11158224 By Remi
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir) 
 from lsPy import lspy
 
 APPNAME = 'distSolution'
@@ -401,7 +396,7 @@ def main():
     
     parser = ArgumentParser(
         prog="distSolution",
-        description="Build VS Project")
+        description="Build, archive and distribute Visual Studio solution")
         
     parser.add_argument(
         "-C",
@@ -513,7 +508,6 @@ def main():
             myexit("different is verstion between targets.")
         verstring = vstT
         
-
     #archive it
     archiveexe = "{}-{}{}".format(configs["name"], verstring, ".exe")
     archiveexefull = os.path.join(configs["archivedir"], archiveexe)
@@ -526,7 +520,6 @@ def main():
         if IsRemoteArchiveExists(urlfull):
             myexit('{} already exists'.format(urlfull))
     
-               
     if not commandargs.skip_archive:
         print("==== creating arhive {} ====".format(archiveexefull))
         args7z = [
@@ -560,14 +553,11 @@ def main():
         print(args7z)
         subprocess.check_call(args7z)
 
-
-
     # upload
     if not commandargs.skip_upload:
         print("==== Uploading to {}... ====".format(configs["remotedir"]))
         daver.dupload(configs["remotedir"], archiveexefull)
         print("Uploaded to {}".format(configs["remotedir"]))
-    
     
     if not commandargs.skip_hashcheck:
         print("==== Compute sha1 and compare... ====")
@@ -587,7 +577,6 @@ def main():
             
         print("sha1 check succeed ({})".format(localSha1))
     
-
     ## update BBS
     if not commandargs.skip_bbs:
         print("==== Updating BBS... ====")
@@ -599,11 +588,6 @@ def main():
                         configs["remotedir"] + archiveexe,
                         getChangeLog(historyFull, versionReg)
                         ))
-    
-
-    ######################
-    ######################
-
     
 def codetest():
     print(updateBBS("testproject", "1.0", "file.zip"))
@@ -624,8 +608,5 @@ if __name__ == "__main__":
     
     print()
     print("==== Disribution Succeeded (elapsed: {}) ====".format(elapsed))
-    
-    
-
     # input('Press ENTER to exit')
     
