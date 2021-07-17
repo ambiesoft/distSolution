@@ -383,10 +383,8 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
 
     if gitrev and 'checkcommitted' in gitrev:
         for gitdir in gitrev['gitdirs']:
-            if not lspy.isGitCommited(gitdir, git):
+            if not lspy.isGitCommited(gitdir, git,Verbose=True):
                 exit('"{}" is not comitted'.format(gitdir))
-            if not lspy.isGitCommited(gitdir,git):
-                exit('"{}" is not committed'.format(gitdir))
 
 def main():
     if sys.version_info[0] < 3:
