@@ -449,11 +449,27 @@ def main():
     parser.add_argument('inputfile',
         nargs='?')
 
+    parser.add_argument(
+        "--currentdir-sameasdist",
+        action="store_true",
+        help="Set current directory as the same directory of input file"
+    )
+
     commandargs = parser.parse_args()
 
+    if commandargs.C and commandargs.currentdir_sameasdist:
+        exit("'-C' and '--currentdir-sameasdist' is exclusive")
     if commandargs.C:
+        print("Setting current directory to '{}'".format(commandargs.C))
         os.chdir(commandargs.C)
-
+    if commandargs.currentdir_sameasdist:
+        if not commandargs.inputfile:
+            exit("No input file. It is needed by '--currentdir-sameasdist'")
+        if not os.path.isabs(commandargs.inputfile):
+            exit("Input file is not absolute path. It must be absolute path to set current directory")
+        dir = os.path.dirname(commandargs.inputfile)
+        print("Setting current directory to '{}'".format(dir))
+        os.chdir(dir)
     if commandargs.show_dummygitrev_wchar:
         createGitRev(None, ShowDummy=True, Char='wchar')
         exit(0)
