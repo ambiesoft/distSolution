@@ -311,7 +311,8 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
     # get hashes from git
     namehash = []
     if ShowDummy:
-        namehash.append(['dummy', '0'*40])
+        namehash.append(['dummy1', '0'*40])
+        namehash.append(['dummy2', '0'*40])
     else:
         for gitdir in gitrev['gitdirs']:
             dir = os.path.basename(os.path.abspath(gitdir)).replace('.','').replace('/','').replace('\\','')
