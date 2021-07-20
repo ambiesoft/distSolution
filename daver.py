@@ -12,9 +12,13 @@ def dupload(remotedir, archive):
     webdav = easywebdav.connect(o.hostname, protocol=o.scheme) # protocol='https') # , username='myuser', password='mypass')
     
     updir = o.path
-    webdav.mkdir(updir)
-    # except ex: #easywebdav.client.OperationFailed as ex:
-    #     exit(ex)
+    try:
+        webdav.mkdir(updir)
+    except easywebdav.client.OperationFailed:
+       pass
+
+    if not webdav.exists(updir):
+        exit("Failed to create '{}'".format(updir))
     
     remotePath = updir + os.path.basename(archive)
     if webdav.exists(remotePath):
