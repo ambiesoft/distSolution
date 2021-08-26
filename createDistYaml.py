@@ -49,6 +49,7 @@ def main():
     
     parser = argparse.ArgumentParser(description = "Create default yaml used as an input of distSolution")
     parser.add_argument("-sln", type=str, help = "solution file", required=False)
+    parser.add_argument("-type", type=str, help = "'json' or 'yaml', default is 'yaml'", default='yaml', required=False)
     parser.add_argument("built_directory", 
                         nargs=None, 
                         type=str, 
@@ -56,6 +57,8 @@ def main():
 
     #command_arguments is dictinary
     command_arguments = parser.parse_args()
+    if command_arguments.type != 'json' and command_arguments.type != 'yaml':
+        exit("-type must be 'json' or 'yaml'")
 
     builtDir = command_arguments.built_directory
     if not isdir(builtDir):
@@ -97,9 +100,11 @@ def main():
     results["obtainverfrom"]= "history.txt"
     results["obtainverregex"]= "\\d+\\.\\d+\\.\\d+"
 
-    # jsonStr = json.dumps(results,ensure_ascii=False, indent=4, sort_keys=False, separators=(',', ': '))
-    yamlStr = yaml.dump(results, sort_keys=False)
-    print(yamlStr)
+    if command_arguments.type == 'json':
+        resultStr = json.dumps(results,ensure_ascii=False, indent=4, sort_keys=False, separators=(',', ': '))
+    else:
+        resultStr = yaml.dump(results, sort_keys=False)
+    print(resultStr)
 
 if __name__ == "__main__":
     main()
