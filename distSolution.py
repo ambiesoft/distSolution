@@ -260,12 +260,12 @@ distConfig is json file, see the following expamle
     ]
 }
 """
-   
-CPPCODEHEAD='''// DO NOT EDIT
+COMMONCODEHEAD='''// DO NOT EDIT
 // This file was created and will be overwritten by distSolution.py
 // DO NOT EDIT
 '''
 
+CPPCODEHEAD=COMMONCODEHEAD
 CPPCODEPREV='''
 #ifndef GITREV_INCLUDED_
 #define GITREV_INCLUDED_
@@ -289,6 +289,38 @@ CPPCODEPOST='''
 #endif  // GITREV_INCLUDED_
 '''
 
+CSHARPCODEHEAD = COMMONCODEHEAD
+
+CSHARPCODEPREV = '''
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ambiesoft {
+    static class GitRev
+    {
+        static Dictionary<string, string> hashes = new Dictionary<string, string>()
+        {
+
+'''
+
+CSHARPCODEPOST='''
+        };
+        public static string GetHashMessage()
+        {
+            var sb = new StringBuilder();
+            foreach(var kv in hashes)
+            {
+                sb.Append(kv.Key);
+                sb.Append(":");
+                sb.Append(kv.Value);
+                sb.AppendLine();
+            }
+            return sb.ToString();
+        }
+    } // class GitRev
+}  // namespace GITREV
+'''
+
 def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
     ''' create or change gitrev.h from git hash '''
     if not ShowDummy:
@@ -296,8 +328,8 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
             return
         if not gitrev['gitdirs']:
             exit('"gitdirs" must be specified in "gitrev"')
-        if not gitrev['outheader'] and not gitrev['outtxt']:
-            exit('"outheader" or "outtxt" must be specified in "gitrev"')
+        if (not 'outheader' in gitrev) and (not 'outtxt' in gitrev) and (not 'outcsharp' in gitrev):
+            exit('"outheader", "outcsharp" or "outtxt" must be specified in "gitrev"')
     
         # find git executable
         for g in gitrev['gits'] if gitrev['gits'] else ['git']:
@@ -322,8 +354,9 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
             namehash.append([dir,hash])
 
     # decide char or wchar
-    if not ShowDummy and gitrev['char']:
-        Char = gitrev['char']
+    if not ShowDummy:
+        if 'char' in gitrev:
+            Char = gitrev['char']
     if Char == 'char':
         cppchar = 'char'
         cppstring = 'std::string'
@@ -337,23 +370,45 @@ def createGitRev(gitrev, ShowDummy=False, DummyType='cpp', Char='char'):
     else:
         exit('Char must be char or wchar')
 
-    if (gitrev and 'outheader' in gitrev) or (ShowDummy and DummyType=='cpp'):
+    if (gitrev and ('outheader' in gitrev or 'outcsharp' in gitrev)) or (ShowDummy and (DummyType=='cpp' or DummyType=='csharp') ):
         if ShowDummy:
             gitrevheader = sys.stdout;
             if not gitrevheader:
                 exit('Failed to open stdout')    
         else:
-            gitrevheader = open(gitrev['outheader'], 'w')
+            if 'outheader' in gitrev and 'outcsharp' in gitrev:
+                exit('Both "outheader" and "outcsharp" are specified. Only one of them is allowed.')
+            if 'outheader' in gitrev:
+                outfile = gitrev['outheader']
+            elif 'outcsharp' in gitrev:
+                outfile = gitrev['outcsharp']
+                DummyType='csharp'
+            if not outfile:
+                exit('No outfile')
+
+            gitrevheader = open(outfile, 'w')
             if not gitrevheader:
-                exit('Failed to open', gitrev['outheader'])
+                exit('Failed to open', outfile)
         
-        gitrevheader.write(CPPCODEHEAD)
+        if DummyType=='cpp':
+            gitrevheader.write(CPPCODEHEAD)
+        elif DummyType=='csharp':
+            gitrevheader.write(CSHARPCODEHEAD)
+        else:
+            exit('Unknown DummyType', DummyType)
 
         insidemap = ''
         for nh in namehash:
             insidemap += '{' + literalL + '"' + nh[0] +  '",' + literalL + '"' + nh[1] + '"},\n'
 
-        code = (CPPCODEPREV + insidemap + CPPCODEPOST) % {
+        if DummyType=='cpp':
+            codetemplate = CPPCODEPREV + insidemap + CPPCODEPOST
+        elif DummyType=='csharp':
+            codetemplate = CSHARPCODEPREV + insidemap + CSHARPCODEPOST
+        else:
+            exit('Unknown DummyType', DummyType)
+        
+        code = codetemplate % {
             'cppchar': cppchar,
             'cppstring': cppstring,
             'cppstringstream': cppstringstream,
@@ -435,12 +490,17 @@ def main():
     parser.add_argument(
         "--show-dummygitrev",
         action="store_true",
-        help="show c++ gitrev code in char. This can be use for the first code."
+        help="show c++ gitrev code in char. This can be use for temporary output."
     )
     parser.add_argument(
         "--show-dummygitrev-wchar",
         action="store_true",
-        help="show c++ gitrev code in wchar_t. This can be use for the first code."
+        help="show c++ gitrev code in wchar_t. This can be use for temporary output."
+    )
+    parser.add_argument(
+        "--show-dummygitrev-csharp",
+        action="store_true",
+        help="show c# gitrev code. This can be use for temporary output."
     )
     parser.add_argument(
         "--show-dummygitrev-txt",
@@ -476,6 +536,9 @@ def main():
         exit(0)
     if commandargs.show_dummygitrev:
         createGitRev(None, ShowDummy=True)
+        exit(0)
+    if commandargs.show_dummygitrev_csharp:
+        createGitRev(None, ShowDummy=True, DummyType='csharp')
         exit(0)
     if commandargs.show_dummygitrev_txt:
         createGitRev(None, ShowDummy=True, DummyType='txt')
