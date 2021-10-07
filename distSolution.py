@@ -17,6 +17,7 @@ from updateBBS import updateBBS
 from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDiffAndExit,IsRemoteArchiveExists,getChangeLog,getFileCount
 from collections import Counter
 import inspect
+import certifi
 
 from lsPy import lspy
 
@@ -644,7 +645,7 @@ def main():
 
         for loop in range(100):
             try:
-                remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
+                remoteSha1 = urllib.request.urlopen(remoteSha1Url, cafile=certifi.where()).read().decode("utf-8")
                 break
             except:
                 print("failed {} times to check remote Sha1. Will try again after waiting 5 seconds.".format(loop+1))
@@ -670,7 +671,7 @@ def main():
 def codetest():
     print(updateBBS("testproject", "1.0", "file.zip"))
     
-    remoteSha1 = urllib.request.urlopen("http://ambiesoft.mooo.com/ffdav/uploads/getSha1.php?file={}".format("/test/test.txt")).read().decode("utf-8")
+    remoteSha1 = urllib.request.urlopen("http://ambiesoft.mooo.com/ffdav/uploads/getSha1.php?file={}".format("/test/test.txt"), cafile=certifi.where()).read().decode("utf-8")
     print(remoteSha1)
     
 if __name__ == "__main__":

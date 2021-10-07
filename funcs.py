@@ -2,6 +2,7 @@ import os
 import re
 import urllib
 import urllib.request
+import certifi
 
 def getAsFullpath(files, outdir):
     return [os.path.realpath(os.path.join(outdir, item)) for item in files]
@@ -64,7 +65,7 @@ def IsRemoteArchiveExists(url):
     
     status = 0
     try:
-        responce = urllib.request.urlopen(request)
+        responce = urllib.request.urlopen(request, cafile=certifi.where())
         status = responce.status
     except urllib.error.HTTPError as e:
         status = e.code

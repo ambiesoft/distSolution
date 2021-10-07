@@ -3,6 +3,7 @@ import urllib
 import time
 # from _sqlite3 import version
 import random
+import certifi
 
 BBSULR='https://ambiesoft.com/minibbs/minibbs.php'
 
@@ -12,9 +13,9 @@ def wbs_request(method_string, url, args={}):
     method = method_string.lower()
 
     if method == ':get':
-        resp = urllib.request.urlopen( "%s?%s" % (url, params) )
+        resp = urllib.request.urlopen( "%s?%s" % (url, params), cafile=certifi.where() )
     elif method == ':post':
-        resp = urllib.request.urlopen(url, params)
+        resp = urllib.request.urlopen(url,params, cafile=certifi.where())
     elif method in ['put', 'delete']:
         raise Exception('Not yet supported')
     else:
