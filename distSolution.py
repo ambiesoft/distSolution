@@ -21,7 +21,7 @@ import inspect
 from lsPy import lspy
 
 APPNAME = 'distSolution'
-VERSION = '1.2.4'
+VERSION = '1.2.5'
 APPDISC = 'build, check files, archive them and distribute solution'
 
 # global config
