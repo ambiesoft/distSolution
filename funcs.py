@@ -77,6 +77,10 @@ def IsRemoteArchiveExists(url):
     else:
         myexit("HEAD request returns invalid status {0}.".format(responce.status))
 
+def doesStartWithDate(line):
+    ''' returns true if line start with date'''
+    return re.match('^\d\d\d\d/\d\d/\d\d', line)
+
 def getChangeLog(fileName, regstr):
     rets = []
     getFirst = False
@@ -84,7 +88,7 @@ def getChangeLog(fileName, regstr):
         for line in f.readlines():
             m = re.search(regstr, line)
         
-            if m and m.group(0):
+            if m and m.group(0) and doesStartWithDate(line):
                 if not getFirst:
                     getFirst=True
                     continue
