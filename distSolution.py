@@ -274,7 +274,7 @@ CPPCODEPREV='''
 #include <string>
 #include <sstream>
 namespace GITREV {
-    static constexpr %(cppchar)s *hashes[][2] =  {
+    static constexpr const %(cppchar)s *hashes[][2] =  {
 
 '''
 
