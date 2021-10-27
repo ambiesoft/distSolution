@@ -24,16 +24,17 @@ def wbs_request(method_string, url, args={}):
     return resp.read()
 
 if __name__ == '__main__':
-    print( wbs_request(":get",'http://blog.udzura.jp/', {'s': 'Ruby'}))
+    # print( wbs_request(":get",'http://blog.udzura.jp/', {'s': 'Ruby'}))
 
-    postdata = {
-        '__mk_ja_JP' : 'カタカナ',
-        'initialSearch' : 1,
-        'url' : 'search-alias',
-        'field-keywords': 'python',
-        'Go' : 'Go'
-    }
-    print( wbs_request(":POST", 'http://www.amazon.co.jp/s/', postdata))
+    # postdata = {
+    #     '__mk_ja_JP' : 'カタカナ',
+    #     'initialSearch' : 1,
+    #     'url' : 'search-alias',
+    #     'field-keywords': 'python',
+    #     'Go' : 'Go'
+    # }
+    # print( wbs_request(":POST", 'http://www.amazon.co.jp/s/', postdata))
+    pass
 
 def updateBBS(project, version, archive, info):
     """update bbs"""
