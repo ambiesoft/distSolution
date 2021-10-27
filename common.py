@@ -7,7 +7,7 @@ from easyhash import getSha1
 import urllib.request
 import time
 from funcs import myexit,showDiffAndExit,getAsFullpath,IsRemoteArchiveExists,getChangeLog
-
+import certifi
 
 def getFileCount(d):
     total = 0
@@ -184,7 +184,7 @@ class DistConfig:
     
         for loop in range(100):
             try:
-                remoteSha1 = urllib.request.urlopen(remoteSha1Url).read().decode("utf-8")
+                remoteSha1 = urllib.request.urlopen(remoteSha1Url, cafile=certifi.where() ).read().decode("utf-8")
                 break
             except:
                 print("failed {} times to check remote Sha1. Will try again after waiting 5 seconds.".format(loop+1))
