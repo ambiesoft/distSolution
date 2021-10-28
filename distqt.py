@@ -11,6 +11,8 @@ from updateBBS import updateBBS
 import errno
 import shutil
 
+import common
+
 class QtTools:
 
     def __init__(self, qtVer, qtRoot, qtTool, make):
@@ -179,7 +181,11 @@ def main():
         nargs=1,
         action='store',
         help="distdir")
-    
+    parser.add_argument(
+        "--show-dummygitrev",
+        action="store_true",
+        help="show c++ gitrev code in char. This can be use for temporary output."
+    )    
     args = parser.parse_args()
     
     if args.C:
@@ -191,7 +197,11 @@ def main():
             my_env["PATH"] = p + os.pathsep + my_env["PATH"]
             os.environ['PATH'] = my_env['PATH']
             print("{} is added to path.".format(p))
-             
+
+    if args.show_dummygitrev:
+        common.createGitRev(None, ShowDummy=True, Char='char')
+        exit(0)
+
     pro = args.profile
     if not pro:
         myexit("project file *.pro must be specified.")
@@ -216,10 +226,10 @@ def main():
             myexit("'{}' is not a directory.".format(distdir))
         
     
-    
     qtTools = QtTools(args.qtversion[0], args.qtroot[0], args.qtversiontools[0], args.make[0])
     distconfig = DistConfig(args.distfile[0])
 
+    distconfig.checkGitrev()
 
     
 #     buildtoolbin = qtTools.buildBinDir()
