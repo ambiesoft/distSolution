@@ -124,6 +124,10 @@ def getMsBuildExe2(pf, vsvar):
             pf = os.path.join(pf, R"Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe")
             if isfile(pf):
                 return pf
+        elif vsvar==17:
+            pf = os.path.join(pf, R"Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe")
+            if isfile(pf):
+                return pf
     return None
  
 def getDevenvExeOrCom2(pf, vsvar, ext):
@@ -163,6 +167,10 @@ def getVsVerFromSln(sln):
             elif topver==16:
                 print ("solution is for Visual Studio 2019")
                 vsvar=16
+                break
+            elif topver==17:
+                print ("solution is for Visual Studio 2022")
+                vsvar=17
                 break
     return vsvar
 
