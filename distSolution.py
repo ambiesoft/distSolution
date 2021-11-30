@@ -66,22 +66,8 @@ def checkShouldOneOfFiles(distDir, shouldone):
     
     return True
             
-def checkTarget(target):
-    global configs
-    
-    outdir = target['outdir'];
-    print("=== Start Testing {} ===".format(outdir))
-    
-    if "ShouldNotBeFiles" in configs:
-      checkShouldnotExistFile(outdir,configs["ShouldNotBeFiles"])
-    
-    if "ShouldBeFiles" in configs:
-      checkShouldBeFiles(outdir, configs["ShouldBeFiles"])
-        
-    if "ShouldBeOneOfThem" in configs:
-      checkShouldOneOfFiles(outdir, configs["ShouldBeOneOfThem"])
-
-    shouldBeFull = getAsFullpath(configs["ShouldBeFiles"], outdir)
+def checkFileCount(sbf, outdir):
+    shouldBeFull = getAsFullpath(sbf, outdir)
     
     if(('TotalFileCount' not in configs) or configs['TotalFileCount']== "exact"):
         showDiffAndExit(outdir,shouldBeFull,configs['TotalFileCount'],True)
@@ -92,6 +78,28 @@ def checkTarget(target):
         myexit("[TotalFileCount] must be int or 'exact'")
       
     print ("Total file count = {}".format(getFileCount(outdir)))    
+
+
+def checkTarget(target):
+    global configs
+    
+    outdir = target['outdir'];
+    print("=== Start Testing {} ===".format(outdir))
+    
+    if "ShouldNotBeFiles" in configs:
+      checkShouldnotExistFile(outdir,configs["ShouldNotBeFiles"])
+    
+    if "ShouldBeFiles" in configs:
+      sbf = configs["ShouldBeFiles"]
+      checkShouldBeFiles(outdir, sbf)    
+      checkFileCount(sbf, outdir)
+    if "ShouldBeFiles" in target:
+      sbf = target["ShouldBeFiles"]
+      checkShouldBeFiles(outdir, sbf)    
+      checkFileCount(sbf, outdir)
+    
+    if "ShouldBeOneOfThem" in configs:
+      checkShouldOneOfFiles(outdir, configs["ShouldBeOneOfThem"])
 
 def getVersionString(target):
     """get version string from history.txt"""
