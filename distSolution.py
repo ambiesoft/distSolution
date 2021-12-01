@@ -369,6 +369,7 @@ def main():
         print("Opening input {} as {}".format(distFile, filetype))
         with open(distFile,encoding="utf-8") as data_file:
             if filetype=='yaml':
+                preinstall.importWithInstall('pyyaml', True)
                 import yaml
                 configs = yaml.safe_load(data_file)
             else:
