@@ -14,7 +14,7 @@ from argparse import ArgumentParser
 import daver
 from easyhash import getSha1
 from updateBBS import updateBBS
-from funcs import getAsFullpath,getPathDiffs,getFileListAsFullPath,myexit,showDiffAndExit,IsRemoteArchiveExists,getChangeLog,getFileCount
+from funcs import getAsFullpath, getPathDiffs, getFileListAsFullPath, myexit, showDiffAndExit, IsRemoteArchiveExists, getChangeLog, getFileCount
 from collections import Counter
 import inspect
 import certifi
@@ -29,6 +29,7 @@ APPDISC = 'build, check files, archive them and distribute solution'
 # global config
 configs = {}
 
+
 def checkShouldnotExistFile(distDir, shouldnot):
     """ Return false if a file that should not be distributed exists. """
     for f in shouldnot:
@@ -36,18 +37,19 @@ def checkShouldnotExistFile(distDir, shouldnot):
         if isfile(fullpath) or isdir(fullpath):
             myexit(fullpath + " exists.")
             return False
-    
+
     return True
-    
+
+
 def checkShouldBeFiles(distDir, shouldbe):
     for f in shouldbe:
-        fullpath = os.path.join(distDir,f)
-        if( not (isfile(fullpath))):
+        fullpath = os.path.join(distDir, f)
+        if(not (isfile(fullpath))):
             myexit(fullpath + " not exists.")
             return False
-    
-    
+
     return True
+
 
 def checkShouldOneOfFiles(distDir, shouldone):
     if shouldone:
@@ -59,128 +61,141 @@ def checkShouldOneOfFiles(distDir, shouldone):
                     myexit(fullpath + " One of them files duplicating.")
                     return False
                 oneofthem = True
-                
+
         if(not oneofthem):
             myexit("None of oneofthem files exists.")
             return False
-    
+
     return True
-            
+
+
 def checkFileCount(sbf, outdir):
     shouldBeFull = getAsFullpath(sbf, outdir)
-    
-    if(('TotalFileCount' not in configs) or configs['TotalFileCount']== "exact"):
-        showDiffAndExit(outdir,shouldBeFull,configs['TotalFileCount'],True)
-    elif(isinstance( configs['TotalFileCount'], int)):
+
+    if(('TotalFileCount' not in configs) or configs['TotalFileCount'] == "exact"):
+        showDiffAndExit(outdir, shouldBeFull, configs['TotalFileCount'], True)
+    elif(isinstance(configs['TotalFileCount'], int)):
         if(configs['TotalFileCount'] != getFileCount(outdir)):
-            showDiffAndExit(outdir,shouldBeFull,configs['TotalFileCount'],False)
+            showDiffAndExit(outdir, shouldBeFull,
+                            configs['TotalFileCount'], False)
     else:
         myexit("[TotalFileCount] must be int or 'exact'")
-      
-    print ("Total file count = {}".format(getFileCount(outdir)))    
+
+    print("Total file count = {}".format(getFileCount(outdir)))
 
 
 def checkTarget(target):
     global configs
-    
-    outdir = target['outdir'];
+
+    outdir = target['outdir']
     print("=== Start Testing {} ===".format(outdir))
-    
+
     if "ShouldNotBeFiles" in configs:
-      checkShouldnotExistFile(outdir,configs["ShouldNotBeFiles"])
-    
+        checkShouldnotExistFile(outdir, configs["ShouldNotBeFiles"])
+
     if "ShouldBeFiles" in configs:
-      sbf = configs["ShouldBeFiles"]
-      checkShouldBeFiles(outdir, sbf)    
-      checkFileCount(sbf, outdir)
+        sbf = configs["ShouldBeFiles"]
+        checkShouldBeFiles(outdir, sbf)
+        checkFileCount(sbf, outdir)
     if "ShouldBeFiles" in target:
-      sbf = target["ShouldBeFiles"]
-      checkShouldBeFiles(outdir, sbf)    
-      checkFileCount(sbf, outdir)
-    
+        sbf = target["ShouldBeFiles"]
+        checkShouldBeFiles(outdir, sbf)
+        checkFileCount(sbf, outdir)
+
     if "ShouldBeOneOfThem" in configs:
-      checkShouldOneOfFiles(outdir, configs["ShouldBeOneOfThem"])
+        checkShouldOneOfFiles(outdir, configs["ShouldBeOneOfThem"])
+
 
 def getVersionString(target):
     """get version string from history.txt"""
     global configs
-    
-    outdir = target['outdir'];
-    
+
+    outdir = target['outdir']
+
     fileName = os.path.join(outdir, configs["obtainverfrom"])
-    with open(fileName, "r", encoding="utf-8") as f:
+    with open(fileName, "r", encoding="utf-8-sig") as f:
         lines = f.readlines()
         for line in lines:
-          regstr = configs["obtainverregex"]
-          m = re.search(regstr, line)
-          if(m):
-            return m.group(0)
-    
+            regstr = configs["obtainverregex"]
+            m = re.search(regstr, line)
+            if(m):
+                return m.group(0)
+
     myexit("Version not found.")
+
 
 def getMsBuildExe2(pf, vsvar):
     if pf:
-        if vsvar==12:
+        if vsvar == 12:
             pf = os.path.join(pf, R"MSBuild\12.0\Bin\MSBuild.exe")
             if isfile(pf):
                 return pf
-        elif vsvar==15:
-            pf = os.path.join(pf, R"Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe")
+        elif vsvar == 15:
+            pf = os.path.join(
+                pf, R"Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe")
             if isfile(pf):
                 return pf
-        elif vsvar==16:
-            pf = os.path.join(pf, R"Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe")
+        elif vsvar == 16:
+            pf = os.path.join(
+                pf, R"Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe")
             if isfile(pf):
                 return pf
-        elif vsvar==17:
-            pf = os.path.join(pf, R"Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe")
+        elif vsvar == 17:
+            pf = os.path.join(
+                pf, R"Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe")
             if isfile(pf):
                 return pf
     return None
- 
+
+
 def getDevenvExeOrCom2(pf, vsvar, ext):
     if pf:
-        if vsvar==12:
-            pf = os.path.join(pf, R"Microsoft Visual Studio 12.0\Common7\IDE\devenv" + ext)
+        if vsvar == 12:
+            pf = os.path.join(
+                pf, R"Microsoft Visual Studio 12.0\Common7\IDE\devenv" + ext)
             if isfile(pf):
                 return pf
         # elif vsvar==15:
         #     pf = os.path.join(pf, R"Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe")
         #     if isfile(pf):
         #         return pf
-        elif vsvar==16:
-            pf = os.path.join(pf, R"Microsoft Visual Studio\2019\Community\Common7\IDE\devenv" + ext)
+        elif vsvar == 16:
+            pf = os.path.join(
+                pf, R"Microsoft Visual Studio\2019\Community\Common7\IDE\devenv" + ext)
             if isfile(pf):
                 return pf
     return None
- 
+
+
 def getVsVerFromSln(sln):
     vsvar = 0
     # Get VS version from solution file
-    with open(sln, "r", encoding="utf-8") as f:
-        lines=f.readlines()
+    with open(sln, "r", encoding="utf-8-sig") as f:
+        lines = f.readlines()
         for line in lines:
-            vsvermatch = re.search('VisualStudioVersion\\s=\\s(?P<topver>\\d+)',line)
+            vsvermatch = re.search(
+                'VisualStudioVersion\\s=\\s(?P<topver>\\d+)', line)
             if not vsvermatch:
                 continue
             topver = int(vsvermatch.group('topver'))
-            if topver==12:
-                print ("solution is for Visual Studio 12")
-                vsvar=12
+            if topver == 12:
+                print("solution is for Visual Studio 12")
+                vsvar = 12
                 break
-            elif topver==15:
-                print ("solution is for Visual Studio 15")
-                vsvar=15
+            elif topver == 15:
+                print("solution is for Visual Studio 15")
+                vsvar = 15
                 break
-            elif topver==16:
-                print ("solution is for Visual Studio 2019")
-                vsvar=16
+            elif topver == 16:
+                print("solution is for Visual Studio 2019")
+                vsvar = 16
                 break
-            elif topver==17:
-                print ("solution is for Visual Studio 2022")
-                vsvar=17
+            elif topver == 17:
+                print("solution is for Visual Studio 2022")
+                vsvar = 17
                 break
     return vsvar
+
 
 def getMsBuildExe(solution):
     vsvar = getVsVerFromSln(solution)
@@ -188,15 +203,16 @@ def getMsBuildExe(solution):
     if not vsvar:
         myexit('Could not find VS version from solution')
 
-    pf = getMsBuildExe2(getenv("ProgramFiles"),vsvar)
+    pf = getMsBuildExe2(getenv("ProgramFiles"), vsvar)
     if pf and isfile(pf):
         return pf
-    
-    pf = getMsBuildExe2(getenv("ProgramFiles(x86)"),vsvar)      
+
+    pf = getMsBuildExe2(getenv("ProgramFiles(x86)"), vsvar)
     if pf and isfile(pf):
         return pf
 
     return None
+
 
 def getDevenvExeOrCom(solution, ext='.com'):
     vsvar = getVsVerFromSln(solution)
@@ -204,69 +220,72 @@ def getDevenvExeOrCom(solution, ext='.com'):
     if not vsvar:
         myexit('Could not find VS version from solution')
 
-    pf = getDevenvExeOrCom2(getenv("ProgramFiles"),vsvar,ext)
+    pf = getDevenvExeOrCom2(getenv("ProgramFiles"), vsvar, ext)
     if pf and isfile(pf):
         return pf
-    
-    pf = getDevenvExeOrCom2(getenv("ProgramFiles(x86)"),vsvar,ext)      
+
+    pf = getDevenvExeOrCom2(getenv("ProgramFiles(x86)"), vsvar, ext)
     if pf and isfile(pf):
         return pf
 
     return None
 
-def build(solution,target):
+
+def build(solution, target):
     """build target of solution"""
     global configs
-    
+
     msbuildexe = getMsBuildExe(solution)
     if not msbuildexe:
         myexit("MSBuild.exe not found.")
-     
 
     args = [
         msbuildexe,
         solution,
-#        "/t:zzzDistResource",
-#        "/p:Configuration=zzzDist",
-#        "/p:Platform={}".format(target["platform"])
+        #        "/t:zzzDistResource",
+        #        "/p:Configuration=zzzDist",
+        #        "/p:Platform={}".format(target["platform"])
     ]
-    
+
     if "platform" in target:
         args.append("/p:platform={}".format(target["platform"]))
- 
+
     if "setoutdirforbuild" in target and target["setoutdirforbuild"]:
         outDirBuild = os.path.abspath(target["outdir"])
-        outDirBuild = os.path.join(outDirBuild, '')  # will add the trailing slash if it's not already there.
+        # will add the trailing slash if it's not already there.
+        outDirBuild = os.path.join(outDirBuild, '')
         args.append('/p:outdir={}'.format(outDirBuild))
-               
+
     if "targetproject" in configs:
         args.append("/t:{}".format(configs["targetproject"]))
 
     if "configuration" in configs:
         args.append("/p:Configuration={}".format(configs["configuration"]))
-        
+
     print(args)
     subprocess.check_call(args)
+
 
 def checkArchivingDir(archivingfull, outdirsfull):
     ''' archivingfull must constans dirs only '''
     # traverse root directory, and list directories as dirs and files as files
     dirs = os.listdir(archivingfull)
-    dirsfull = [os.path.join(archivingfull,dir) for dir in dirs]
+    dirsfull = [os.path.join(archivingfull, dir) for dir in dirs]
     # compare efficiently
     if Counter(dirsfull) != Counter(outdirsfull):
         myexit('archivingdir is not equal to outdirs')
 
+
 def main():
     if sys.version_info[0] < 3:
         exit("Please use python3" + sys.version)
-        
+
     # print('{} {} ({})'.format(APPNAME,VERSION,APPDISC))
-    
+
     parser = ArgumentParser(
         prog="distSolution",
         description="Build, archive and distribute Visual Studio solution")
-        
+
     parser.add_argument(
         "-C",
         nargs='?',
@@ -323,7 +342,7 @@ def main():
         help="show gitrev text. This can be use for the first dummy output."
     )
     parser.add_argument('inputfile',
-        nargs='?')
+                        nargs='?')
 
     parser.add_argument(
         "--currentdir-sameasdist",
@@ -342,7 +361,8 @@ def main():
         if not commandargs.inputfile:
             exit("No input file. It is needed by '--currentdir-sameasdist'")
         if not os.path.isabs(commandargs.inputfile):
-            exit("Input file is not absolute path. It must be absolute path to set current directory")
+            exit(
+                "Input file is not absolute path. It must be absolute path to set current directory")
         dir = os.path.dirname(commandargs.inputfile)
         print("Setting current directory to '{}'".format(dir))
         os.chdir(dir)
@@ -359,16 +379,16 @@ def main():
         common.createGitRev(None, ShowDummy=True, DummyType='txt')
         exit(0)
 
-    global configs    
-    
+    global configs
+
     if sys.stdin.isatty():
         if not commandargs.inputfile:
             exit('No input input file')
         distFile = commandargs.inputfile
         filetype = lspy.getInputfileType(distFile)
         print("Opening input {} as {}".format(distFile, filetype))
-        with open(distFile,encoding="utf-8") as data_file:
-            if filetype=='yaml':
+        with open(distFile, encoding="utf-8-sig") as data_file:
+            if filetype == 'yaml':
                 preinstall.importWithInstall('pyyaml', True)
                 import yaml
                 configs = yaml.safe_load(data_file)
@@ -378,7 +398,7 @@ def main():
         # read from pipe
         configs = json.load(sys.stdin)
 
-    # create gitrev.h if specified          
+    # create gitrev.h if specified
     if 'gitrev' in configs:
         common.createGitRev(configs['gitrev'])
 
@@ -386,34 +406,34 @@ def main():
         exit('"solution" is not specifed')
 
     solutionFile = os.path.join(os.path.dirname(distFile), configs["solution"])
-    verstring="";
-    
+    verstring = ""
+
     # build first
     if not commandargs.skip_build:
         for target in configs['targets']:
             build(solutionFile, target)
 
-    # check      
+    # check
     for target in configs['targets']:
-        if not commandargs.skip_check: 
+        if not commandargs.skip_check:
             checkTarget(target)
         vstT = getVersionString(target)
         if(verstring and verstring != vstT):
             myexit("different is verstion between targets.")
         verstring = vstT
-        
-    #archive it
+
+    # archive it
     archiveexe = "{}-{}{}".format(configs["name"], verstring, ".exe")
     archiveexefull = os.path.join(configs["archivedir"], archiveexe)
     if not commandargs.skip_archive:
         if isfile(archiveexefull):
             myexit('{} already exists, remove it first.'.format(archiveexefull))
-     
+
     urlfull = configs['remotedir'] + archiveexe
     if not commandargs.skip_upload:
         if IsRemoteArchiveExists(urlfull):
             myexit('{} already exists'.format(urlfull))
-    
+
     if not commandargs.skip_archive:
         print("==== creating arhive {} ====".format(archiveexefull))
         args7z = [
@@ -422,7 +442,7 @@ def main():
             "-sfx7z.sfx",
             archiveexefull,
         ]
-        
+
         if 'archivingdir' in configs:
             # check the archivingdir only contains outdirs
             archivingfull = os.path.abspath(configs['archivingdir'])
@@ -434,16 +454,16 @@ def main():
             args7z.append(archivingfull)
         else:
             # no duplicate in args7z
-            addedtarget=[]
+            addedtarget = []
             for t in configs['targets']:
                 outdir = t['outdir']
                 if outdir not in addedtarget:
                     outdirfull = os.path.abspath(outdir)
                     args7z.append(outdirfull)
                 addedtarget.append(outdir)
-            
-        args7z.append("-mx9");
-        
+
+        args7z.append("-mx9")
+
         print(args7z)
         subprocess.check_call(args7z)
 
@@ -452,7 +472,7 @@ def main():
         print("==== Uploading to {}... ====".format(configs["remotedir"]))
         daver.dupload(configs["remotedir"], archiveexefull)
         print("Uploaded to {}".format(configs["remotedir"]))
-    
+
     if not commandargs.skip_hashcheck:
         print("==== Compute sha1 and compare... ====")
         localSha1 = getSha1(archiveexefull)
@@ -460,47 +480,51 @@ def main():
 
         for loop in range(100):
             try:
-                remoteSha1 = urllib.request.urlopen(remoteSha1Url, cafile=certifi.where()).read().decode("utf-8")
+                remoteSha1 = urllib.request.urlopen(
+                    remoteSha1Url, cafile=certifi.where()).read().decode("utf-8")
                 break
             except:
-                print("failed {} times to check remote Sha1. Will try again after waiting 5 seconds.".format(loop+1))
-                time.sleep(5) # wait 5 seconds
-        
+                print(
+                    "failed {} times to check remote Sha1. Will try again after waiting 5 seconds.".format(loop+1))
+                time.sleep(5)  # wait 5 seconds
+
         if localSha1.lower() != remoteSha1.lower():
             myexit("sha1 not equal ({} != {}".format(localSha1, remoteSha1))
-            
+
         print("sha1 check succeed ({})".format(localSha1))
-    
-    ## update BBS
+
+    # update BBS
     if not commandargs.skip_bbs:
         print("==== Updating BBS... ====")
         historyFull = os.path.join(configs['targets'][0]['outdir'],
-                                configs['obtainverfrom'])
+                                   configs['obtainverfrom'])
         versionReg = configs['obtainverregex']
-        print(updateBBS( configs['name'], 
-                        verstring, 
+        print(updateBBS(configs['name'],
+                        verstring,
                         configs["remotedir"] + archiveexe,
                         getChangeLog(historyFull, versionReg)
                         ))
-    
+
+
 def codetest():
     print(updateBBS("testproject", "1.0", "file.zip"))
-    
-    remoteSha1 = urllib.request.urlopen("http://ambiesoft.mooo.com/ffdav/uploads/getSha1.php?file={}".format("/test/test.txt"), cafile=certifi.where()).read().decode("utf-8")
+
+    remoteSha1 = urllib.request.urlopen("http://ambiesoft.mooo.com/ffdav/uploads/getSha1.php?file={}".format(
+        "/test/test.txt"), cafile=certifi.where()).read().decode("utf-8")
     print(remoteSha1)
-    
+
+
 if __name__ == "__main__":
     # codetest()
-    
+
     start = timeit.default_timer()
     main()
     stop = timeit.default_timer()
-    
+
     m, s = divmod(stop - start, 60)
     h, m = divmod(m, 60)
     elapsed = "%d:%02d:%02d" % (h, m, s)
-    
+
     print()
     print("==== Disribution Succeeded (elapsed: {}) ====".format(elapsed))
     # input('Press ENTER to exit')
-    
