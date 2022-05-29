@@ -294,19 +294,19 @@ def main():
 
         print("==== deploying ====")
         for releaseexe in distconfig.getBuiltExes():
-            commandArgs = []
+            args = []
             deploytool = qtTools.deployTool()  # getDeployTool(qtroot)
             # releaseexe = "release/{}.exe".format(distconfig.getProjectName())
 
             if not os.path.isfile(releaseexe):
                 myexit("Release exe {} not found.".format(releaseexe))
 
-            commandArgs.append(deploytool)
-            commandArgs.append(releaseexe)
-            commandArgs.append('--libdir')
-            commandArgs.append(distdir)
-            print(commandArgs)
-            subprocess.check_call(commandArgs)
+            args.append(deploytool)
+            args.append(releaseexe)
+            args.append('--libdir')
+            args.append(distdir)
+            print(args)
+            subprocess.check_call(args)
 
             dest = os.path.join(distdir, '{}.exe'.format(
                 distconfig.getProjectName()))
