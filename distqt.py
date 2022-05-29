@@ -213,25 +213,25 @@ def main():
         action="store_true",
         help="show c++ gitrev code in char. This can be use for temporary output."
     )
-    args = parser.parse_args()
+    commandArgs = parser.parse_args()
 
-    if args.C:
-        os.chdir(args.C)
+    if commandArgs.C:
+        os.chdir(commandArgs.C)
         print("Current directory has been set to {}".format(
             os.path.realpath(os.curdir)))
 
-    if args.path:
-        for p in args.path:
+    if commandArgs.path:
+        for p in commandArgs.path:
             my_env = os.environ.copy()
             my_env["PATH"] = p + os.pathsep + my_env["PATH"]
             os.environ['PATH'] = my_env['PATH']
             print("{} is added to path.".format(p))
 
-    if args.show_dummygitrev:
+    if commandArgs.show_dummygitrev:
         common.createGitRev(None, ShowDummy=True, Char='char')
         exit(0)
 
-    pro = args.profile
+    pro = commandArgs.profile
     if not pro:
         myexit("project file *.pro must be specified.")
     if not os.path.isfile(pro):
@@ -245,17 +245,17 @@ def main():
         if not os.path.isdir("build"):
             myexit("Could not create dir [build]")
 
-    if not args.distdir:
+    if not commandArgs.distdir:
         myexit("-distdir must not be empty.")
-    distdir = args.distdir[0]
+    distdir = commandArgs.distdir[0]
     if not os.path.isdir(distdir):
         os.mkdir(distdir)
         if not os.path.isdir(distdir):
             myexit("'{}' is not a directory.".format(distdir))
 
     qtTools = QtTools(
-        args.qtversion[0], args.qtroot[0], args.qtversiontools[0], args.make[0])
-    distconfig = DistConfig(args.distfile[0])
+        commandArgs.qtversion[0], commandArgs.qtroot[0], commandArgs.qtversiontools[0], commandArgs.make[0])
+    distconfig = DistConfig(commandArgs.distfile[0])
 
     distconfig.checkGitrev()
 
@@ -266,7 +266,7 @@ def main():
 #     os.environ['PATH'] = my_env['PATH']
 #     print("{} is added to path.".format(buildtoolbin))
 
-    if not args.skip_build:
+    if not commandArgs.skip_build:
         os.chdir("build")
         print("Entered directory {}".format(os.getcwd()))
 
@@ -289,24 +289,24 @@ def main():
         print(args)
         subprocess.check_call(args)
 
-    if not args.skip_deploy:
+    if not commandArgs.skip_deploy:
         ensureDir(distdir)
 
         print("==== deploying ====")
         for releaseexe in distconfig.getBuiltExes():
-            args = []
+            commandArgs = []
             deploytool = qtTools.deployTool()  # getDeployTool(qtroot)
             # releaseexe = "release/{}.exe".format(distconfig.getProjectName())
 
             if not os.path.isfile(releaseexe):
                 myexit("Release exe {} not found.".format(releaseexe))
 
-            args.append(deploytool)
-            args.append(releaseexe)
-            args.append('--libdir')
-            args.append(distdir)
-            print(args)
-            subprocess.check_call(args)
+            commandArgs.append(deploytool)
+            commandArgs.append(releaseexe)
+            commandArgs.append('--libdir')
+            commandArgs.append(distdir)
+            print(commandArgs)
+            subprocess.check_call(commandArgs)
 
             dest = os.path.join(distdir, '{}.exe'.format(
                 distconfig.getProjectName()))
@@ -336,18 +336,18 @@ def main():
 
     verstr = distconfig.getVersionString(distdir)
 
-    if not args.skip_archive:
+    if not commandArgs.skip_archive:
         print("==== creating archive ====")
         print('version is {0}'.format(verstr))
         distconfig.checkAlreadyUploaded(verstr)
         distconfig.createArchive(
             r"C:\LegacyPrograms\7-Zip\7z.exe", distdir, verstr)
 
-    if not args.skip_upload:
+    if not commandArgs.skip_upload:
         print("==== uploading archive ====")
         distconfig.upload()
 
-    if not args.skip_bbs:
+    if not commandArgs.skip_bbs:
         # update BBS
         print("==== Updating BBS... ====")
         print(updateBBS(distconfig.getProjectName(),
