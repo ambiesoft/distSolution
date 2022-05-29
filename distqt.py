@@ -4,7 +4,8 @@ import timeit
 import subprocess
 from shutil import copyfile
 from argparse import ArgumentParser
-import glob, shutil
+import glob
+import shutil
 import json
 from common import *
 from updateBBS import updateBBS
@@ -12,6 +13,7 @@ import errno
 import shutil
 
 import common
+
 
 class QtTools:
 
@@ -38,12 +40,12 @@ class QtTools:
 #         ret = os.path.join(self.qtRoot, 'Tools', self.qtBuildTool, 'bin')
 #         if not os.path.isdir(ret):
 #             myexit("{} is not directory.".format(ret))
-# 
+#
 #         return ret
 
     def getMake(self):
         return self.make
-    
+
     def qmake(self):
         dir = self.binDir()
         qmake = os.path.join(dir, "qmake.exe")
@@ -74,7 +76,6 @@ class QtTools:
 
         return q
 
-
     def translationsDir(self):
         q = os.path.join(self.qtRoot, self.qtVer)
         if not os.path.isdir(q):
@@ -86,13 +87,9 @@ class QtTools:
         if not os.path.isdir(q):
             myexit("{} is not found.".format(q))
 
-        return q;
-        
+        return q
 
 
-                
-                
-                
 def myexit_obsolete(message):
     print(message)
     exit(1)
@@ -117,7 +114,7 @@ def copyQtFile(destdir, srcdir, qtfile):
     src = os.path.join(srcdir, qtfile)
     dest = os.path.join(destdir, qtfile)
 
-    #https://stackoverflow.com/a/46014620
+    # https://stackoverflow.com/a/46014620
     try:
         shutil.copy(src, dest)
     except IOError as e:
@@ -130,7 +127,7 @@ def copyQtFile(destdir, srcdir, qtfile):
 
     print('copied: {0} => {1}'.format(src, dest))
 
-        
+
 def main():
     parser = ArgumentParser(
         prog="distqt",
@@ -142,9 +139,39 @@ def main():
         action="store",
         help="Set current directory.")
     parser.add_argument(
+        "--skip-build",
+        action="store_true",
+        help="skip build process"
+    )
+    parser.add_argument(
+        "--skip-deploy",
+        action="store_true",
+        help="skip deploy process"
+    )
+    parser.add_argument(
+        "--skip-archive",
+        action="store_true",
+        help="skip archive process"
+    )
+    parser.add_argument(
+        "--skip-upload",
+        action="store_true",
+        help="skip upload process"
+    )
+    parser.add_argument(
+        "--skip-hashcheck",
+        action="store_true",
+        help="skip hashcheck process"
+    )
+    parser.add_argument(
+        "--skip-bbs",
+        action="store_true",
+        help="skip bbs process"
+    )
+    parser.add_argument(
         "profile",
         nargs='?'
-        )
+    )
     parser.add_argument(
         "-qtroot",
         nargs=1,
@@ -162,10 +189,10 @@ def main():
         action='store',
         help="Qt Version-tools (like mingw53_32)")
     parser.add_argument(
-         "-make",
-         nargs=1,
-         action='store',
-         help="path to 'make' or 'msbuild'")
+        "-make",
+        nargs=1,
+        action='store',
+        help="path to 'make' or 'msbuild'")
     parser.add_argument(
         "-distfile",
         nargs=1,
@@ -185,12 +212,14 @@ def main():
         "--show-dummygitrev",
         action="store_true",
         help="show c++ gitrev code in char. This can be use for temporary output."
-    )    
+    )
     args = parser.parse_args()
-    
+
     if args.C:
         os.chdir(args.C)
-        
+        print("Current directory has been set to {}".format(
+            os.path.realpath(os.curdir)))
+
     if args.path:
         for p in args.path:
             my_env = os.environ.copy()
@@ -210,13 +239,12 @@ def main():
 
     if not os.path.isabs(pro):
         pro = os.path.join('../', pro)
-        
+
     if not os.path.isdir("build"):
         os.mkdir("build")
         if not os.path.isdir("build"):
             myexit("Could not create dir [build]")
 
-    
     if not args.distdir:
         myexit("-distdir must not be empty.")
     distdir = args.distdir[0]
@@ -224,74 +252,73 @@ def main():
         os.mkdir(distdir)
         if not os.path.isdir(distdir):
             myexit("'{}' is not a directory.".format(distdir))
-        
-    
-    qtTools = QtTools(args.qtversion[0], args.qtroot[0], args.qtversiontools[0], args.make[0])
+
+    qtTools = QtTools(
+        args.qtversion[0], args.qtroot[0], args.qtversiontools[0], args.make[0])
     distconfig = DistConfig(args.distfile[0])
 
     distconfig.checkGitrev()
 
-    
+
 #     buildtoolbin = qtTools.buildBinDir()
 #     my_env = os.environ.copy()
 #     my_env["PATH"] = buildtoolbin + os.pathsep + my_env["PATH"]
 #     os.environ['PATH'] = my_env['PATH']
 #     print("{} is added to path.".format(buildtoolbin))
 
-    os.chdir("build")
-    print("Entered directory {}".format(os.getcwd()))
+    if not args.skip_build:
+        os.chdir("build")
+        print("Entered directory {}".format(os.getcwd()))
 
-    print("==== creating Makefile ====")
-    qmake = qtTools.qmake()  # getQmake(qtroot)
+        print("==== creating Makefile ====")
+        qmake = qtTools.qmake()  # getQmake(qtroot)
 
-    args = []
-    args.append(qmake)
-    args.append(pro)
-
-    print(args)
-    subprocess.check_call(args)
-
-    print("==== make ====")
-    make = qtTools.getMake() # "mingw32-make.exe"
-
-    args = []
-    args.append(make)
-
-    print(args)
-    subprocess.check_call(args)
-
-    # print("==== Check version ====")
-    
-    ensureDir(distdir)
-
-    print("==== deploying ====")
-    for releaseexe in distconfig.getBuiltExes(): 
         args = []
-        deploytool = qtTools.deployTool()  # getDeployTool(qtroot)
-        # releaseexe = "release/{}.exe".format(distconfig.getProjectName())
-    
-        if not os.path.isfile(releaseexe):
-            myexit("Release exe {} not found.".format(releaseexe))
-    
-    
-        args.append(deploytool)
-        args.append(releaseexe)
-        args.append('--libdir')
-        args.append(distdir)
+        args.append(qmake)
+        args.append(pro)
+
         print(args)
         subprocess.check_call(args)
-    
-           
-        dest = os.path.join(distdir, '{}.exe'.format(distconfig.getProjectName()))
-        copyfile(releaseexe, dest)
-        print('copied: {0} => {1}'.format(releaseexe, dest))
+
+        print("==== make ====")
+        make = qtTools.getMake()  # "mingw32-make.exe"
+
+        args = []
+        args.append(make)
+
+        print(args)
+        subprocess.check_call(args)
+
+    if not args.skip_deploy:
+        ensureDir(distdir)
+
+        print("==== deploying ====")
+        for releaseexe in distconfig.getBuiltExes():
+            args = []
+            deploytool = qtTools.deployTool()  # getDeployTool(qtroot)
+            # releaseexe = "release/{}.exe".format(distconfig.getProjectName())
+
+            if not os.path.isfile(releaseexe):
+                myexit("Release exe {} not found.".format(releaseexe))
+
+            args.append(deploytool)
+            args.append(releaseexe)
+            args.append('--libdir')
+            args.append(distdir)
+            print(args)
+            subprocess.check_call(args)
+
+            dest = os.path.join(distdir, '{}.exe'.format(
+                distconfig.getProjectName()))
+            copyfile(releaseexe, dest)
+            print('copied: {0} => {1}'.format(releaseexe, dest))
 
     # copy plugins
     print("==== copy plugins ====")
     copyQtFile(distdir, qtTools.pluginDir(), 'platforms/qwindows.dll')
     for plugin in distconfig.getCopyPlugins():
         copyQtFile(distdir, qtTools.pluginDir(), plugin)
-    
+
     # copy qt translation files
     print("==== copy translations of Qt ====")
     desttransdir = os.path.join(distdir, 'translations')
@@ -300,36 +327,35 @@ def main():
         if not os.path.isdir(desttransdir):
             myexit('{0} is not a directory'.format(desttransdir))
     for trans in distconfig.getCopyTranslations():
-        copyQtFile(desttransdir, qtTools.translationsDir(), trans) #os.path.join('translation',trans))
+        # os.path.join('translation',trans))
+        copyQtFile(desttransdir, qtTools.translationsDir(), trans)
 
-    
     # dist check
     print("==== check files ====")
     distconfig.checkTarget(distdir)
 
-
-
     verstr = distconfig.getVersionString(distdir)
 
+    if not args.skip_archive:
+        print("==== creating archive ====")
+        print('version is {0}'.format(verstr))
+        distconfig.checkAlreadyUploaded(verstr)
+        distconfig.createArchive(
+            r"C:\LegacyPrograms\7-Zip\7z.exe", distdir, verstr)
 
-    print("==== creating archive ====")
-    print('version is {0}'.format(verstr))
-    distconfig.checkAlreadyUploaded(verstr)
-    distconfig.createArchive(r"C:\LegacyPrograms\7-Zip\7z.exe", distdir, verstr)
-        
+    if not args.skip_upload:
+        print("==== uploading archive ====")
+        distconfig.upload()
 
-    print("==== uploading archive ====")
-    distconfig.upload()
-    
+    if not args.skip_bbs:
+        # update BBS
+        print("==== Updating BBS... ====")
+        print(updateBBS(distconfig.getProjectName(),
+                        verstr,
+                        distconfig.getRemoteDir() + distconfig.getArchiveName(verstr),
+                        distconfig.getChangeLong(distdir)))
 
-    ## update BBS
-    print("==== Updating BBS... ====")
-    print(updateBBS( distconfig.getProjectName(), 
-                     verstr, 
-                     distconfig.getRemoteDir() + distconfig.getArchiveName(verstr),
-                     distconfig.getChangeLong(distdir)))
 
-    
 if __name__ == "__main__":
     # codetest()
 
