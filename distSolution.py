@@ -164,6 +164,11 @@ def getDevenvExeOrCom2(pf, vsvar, ext):
                 pf, R"Microsoft Visual Studio\2019\Community\Common7\IDE\devenv" + ext)
             if isfile(pf):
                 return pf
+        elif vsvar == 17:
+            pf = os.path.join(
+                pf, R"Microsoft Visual Studio\2022\Community\Common7\IDE\devenv" + ext)
+            if isfile(pf):
+                return pf
     return None
 
 
