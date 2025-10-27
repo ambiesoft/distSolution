@@ -501,20 +501,23 @@ def main():
     # update BBS
     if not commandargs.skip_bbs:
         print("==== Updating BBS... ====")
+        if not configs["remoteonedrivedir"]:
+            myexit("remoteonedrivedir is not specified in config.")
+            
         historyFull = os.path.join(configs['targets'][0]['outdir'],
                                    configs['obtainverfrom'])
         versionReg = configs['obtainverregex']
-        print(updateBBS(configs['name'],
+        updateBBS(configs['name'],
                         verstring,
-                        configs["remotedir"] + archiveexe,
+                        # configs["remotedir"] + archiveexe,
+                        configs["remoteonedrivedir"],
                         getChangeLog(historyFull, versionReg)
-                        ))
-
+                        )
 
 def codetest():
     print(updateBBS("testproject", "1.0", "file.zip"))
 
-    remoteSha1 = urllib.request.urlopen("http://ambiesoft.mooo.com/ffdav/uploads/getSha1.php?file={}".format(
+    remoteSha1 = urllib.request.urlopen("http://ambiesoft.com/ffdav/uploads/getSha1.php?file={}".format(
         "/test/test.txt"), cafile=certifi.where()).read().decode("utf-8")
     print(remoteSha1)
 

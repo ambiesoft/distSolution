@@ -5,7 +5,8 @@ import time
 import random
 import certifi
 
-BBSULR='https://ambiesoft.com/minibbs/minibbs.php'
+# BBSULR='https://ambiesoft.com/minibbs/minibbs.php'
+BBSULR = 'https://script.google.com/macros/s/AKfycbwjWk-b48HhljeR33bwfZHPOpNXbGPkWc5PQ8Meb_lg4g3w9NILL96MPf3DgLnjgXen3A/exec';
 
 # https://gist.github.com/masahitojp/863593
 def wbs_request(method_string, url, args={}):
@@ -23,17 +24,27 @@ def wbs_request(method_string, url, args={}):
 
     return resp.read()
 
-if __name__ == '__main__':
-    # print( wbs_request(":get",'http://blog.udzura.jp/', {'s': 'Ruby'}))
+import datetime
+import requests
+def wbs_requestGBBS(postdata):
+    GAS_URL = "https://script.google.com/macros/s/AKfycbwjWk-b48HhljeR33bwfZHPOpNXbGPkWc5PQ8Meb_lg4g3w9NILL96MPf3DgLnjgXen3A/exec"
 
-    # postdata = {
-    #     '__mk_ja_JP' : 'カタカナ',
-    #     'initialSearch' : 1,
-    #     'url' : 'search-alias',
-    #     'field-keywords': 'python',
-    #     'Go' : 'Go'
-    # }
-    # print( wbs_request(":POST", 'http://www.amazon.co.jp/s/', postdata))
+    SendDATA = {
+        "name": postdata['name'],
+        "message": postdata['body'],
+        "timestamp": datetime.datetime.utcnow().isoformat()
+    }
+
+    response = requests.post(
+        GAS_URL,
+        headers={"Content-Type": "application/json"},
+        json=SendDATA
+    )
+
+    print("Update GBBS Status:", response.status_code)
+    print("Update GBBS Response:", response.text)
+
+if __name__ == '__main__':
     pass
 
 def updateBBS(project, version, archive, info):
@@ -46,8 +57,10 @@ def updateBBS(project, version, archive, info):
         'email':'ambiesoft.trueff@gmail.com',
         'subject' : '更新されました: {0}'.format(project),
         'delkey' : random.randrange(65535),
-        'body' : '{0} ver{1} updated.\n{2}\n\n更新内容：\n{3}'.format(project, version, archive, info)
+        # 'body' : '{0} ver{1} updated.\n{2}\n\n更新内容：\n{3}'.format(project, version, archive, info)
+        'body' : '{0} is updated to ver{1}.\n{2}\n\n更新内容：\n{3}'.format(project, version, archive, info).strip()
     }
     
-    return wbs_request(":post", BBSULR, postdata)
+    # return wbs_request(":get", BBSULR, postdata)
+    return wbs_requestGBBS(postdata)
     
