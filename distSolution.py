@@ -44,7 +44,7 @@ def checkShouldnotExistFile(distDir, shouldnot):
 def checkShouldBeFiles(distDir, shouldbe):
     for f in shouldbe:
         fullpath = os.path.join(distDir, f)
-        if(not (isfile(fullpath))):
+        if (not (isfile(fullpath))):
             myexit(fullpath + " not exists.")
             return False
 
@@ -56,13 +56,13 @@ def checkShouldOneOfFiles(distDir, shouldone):
         oneofthem = False
         for f in shouldone:
             fullpath = distDir+f
-            if(isfile(fullpath)):
-                if(oneofthem):
+            if (isfile(fullpath)):
+                if (oneofthem):
                     myexit(fullpath + " One of them files duplicating.")
                     return False
                 oneofthem = True
 
-        if(not oneofthem):
+        if (not oneofthem):
             myexit("None of oneofthem files exists.")
             return False
 
@@ -72,10 +72,10 @@ def checkShouldOneOfFiles(distDir, shouldone):
 def checkFileCount(sbf, outdir):
     shouldBeFull = getAsFullpath(sbf, outdir)
 
-    if(('TotalFileCount' not in configs) or configs['TotalFileCount'] == "exact"):
+    if (('TotalFileCount' not in configs) or configs['TotalFileCount'] == "exact"):
         showDiffAndExit(outdir, shouldBeFull, configs['TotalFileCount'], True)
-    elif(isinstance(configs['TotalFileCount'], int)):
-        if(configs['TotalFileCount'] != getFileCount(outdir)):
+    elif (isinstance(configs['TotalFileCount'], int)):
+        if (configs['TotalFileCount'] != getFileCount(outdir)):
             showDiffAndExit(outdir, shouldBeFull,
                             configs['TotalFileCount'], False)
     else:
@@ -118,7 +118,7 @@ def getVersionString(target):
         for line in lines:
             regstr = configs["obtainverregex"]
             m = re.search(regstr, line)
-            if(m):
+            if (m):
                 return m.group(0)
 
     myexit("Version not found.")
@@ -148,7 +148,7 @@ def getMsBuildExe2(pf, vsvar):
     return None
 
 
-def getDevenvExeOrCom2(pf, vsvar, ext):
+def getDevenvExeOrComInner(pf, vsvar, ext):
     if pf:
         if vsvar == 12:
             pf = os.path.join(
@@ -225,19 +225,22 @@ def getDevenvExeOrCom(solution, ext='.com'):
     if not vsvar:
         myexit('Could not find VS version from solution')
 
-    pf = getDevenvExeOrCom2(getenv("ProgramFiles"), vsvar, ext)
+    pf = getDevenvExeOrComInner(getenv("ProgramFiles"), vsvar, ext)
     if pf and isfile(pf):
         return pf
 
-    pf = getDevenvExeOrCom2(getenv("ProgramFiles(x86)"), vsvar, ext)
+    pf = getDevenvExeOrComInner(getenv("ProgramFiles(x86)"), vsvar, ext)
     if pf and isfile(pf):
         return pf
 
     return None
 
 
-def build(solution, target):
+def buildwithMSBuild(solution, target):
     """build target of solution"""
+
+    nugetRestore(solution)
+
     global configs
 
     msbuildexe = getMsBuildExe(solution)
@@ -266,6 +269,57 @@ def build(solution, target):
 
     if "configuration" in configs:
         args.append("/p:Configuration={}".format(configs["configuration"]))
+
+    print(args)
+    subprocess.check_call(args)
+
+
+def nugetRestore(solution):
+    """ restore nuget packages """
+    msbuildexe = getMsBuildExe(solution)
+    if not msbuildexe:
+        myexit("MSBuild.exe not found.")
+
+    args = [
+        msbuildexe,
+        solution,
+        "/t:Restore"
+    ]
+
+    print(args)
+    subprocess.check_call(args)
+
+
+def buildwithDEVENV(solution, target):
+    """build target of solution"""
+    global configs
+
+    nugetRestore(solution)
+
+    devenvexe = getDevenvExeOrCom(solution)
+    if not devenvexe:
+        myexit("devenv.exe not found.")
+
+    args = [
+        devenvexe,
+        solution,
+        # '/build', 'zzzDist|Win32',
+        # '/project', 'zzzDistResource'
+    ]
+
+    if "configuration" in configs:
+        args.append('/build')
+        arg = configs["configuration"]
+        if "platform" in target:
+            arg = arg + '|' + target["platform"]
+        args.append(arg)
+
+    if "setoutdirforbuild" in target and target["setoutdirforbuild"]:
+        myexit("'outdir' is no supported in devenv build.")
+
+    if "targetproject" in configs:
+        args.append('/project')
+        args.append(configs["targetproject"])
 
     print(args)
     subprocess.check_call(args)
@@ -416,14 +470,17 @@ def main():
     # build first
     if not commandargs.skip_build:
         for target in configs['targets']:
-            build(solutionFile, target)
+            if 'builder' in configs and configs['builder'] == 'devenv':
+                buildwithDEVENV(solutionFile, target)
+            else:
+                buildwithMSBuild(solutionFile, target)
 
     # check
     for target in configs['targets']:
         if not commandargs.skip_check:
             checkTarget(target)
         vstT = getVersionString(target)
-        if(verstring and verstring != vstT):
+        if (verstring and verstring != vstT):
             myexit("different is verstion between targets.")
         verstring = vstT
 
@@ -503,16 +560,17 @@ def main():
         print("==== Updating BBS... ====")
         if not configs["remoteonedrivedir"]:
             myexit("remoteonedrivedir is not specified in config.")
-            
+
         historyFull = os.path.join(configs['targets'][0]['outdir'],
                                    configs['obtainverfrom'])
         versionReg = configs['obtainverregex']
         updateBBS(configs['name'],
-                        verstring,
-                        # configs["remotedir"] + archiveexe,
-                        configs["remoteonedrivedir"],
-                        getChangeLog(historyFull, versionReg)
-                        )
+                  verstring,
+                  # configs["remotedir"] + archiveexe,
+                  configs["remoteonedrivedir"],
+                  getChangeLog(historyFull, versionReg)
+                  )
+
 
 def codetest():
     print(updateBBS("testproject", "1.0", "file.zip"))
