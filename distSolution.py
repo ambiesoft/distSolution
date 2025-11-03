@@ -499,7 +499,7 @@ def main():
     if not commandargs.skip_archive:
         print("==== creating arhive {} ====".format(archiveexefull))
         args7z = [
-            r"C:/LegacyPrograms/7-Zip/7z.exe",
+            r"C:/LegacyPrograms/7z/7z.exe",
             "a",
             "-sfx7z.sfx",
             archiveexefull,
@@ -524,8 +524,13 @@ def main():
                     args7z.append(outdirfull)
                 addedtarget.append(outdir)
 
+        args7z.append("-m0=lzma2")
         args7z.append("-mx9")
-
+        args7z.append("-mmt=on")
+        args7z.append("-md=512m")
+        args7z.append("-mfb=273")
+        args7z.append("-ms=on")
+     
         print(args7z)
         subprocess.check_call(args7z)
 
