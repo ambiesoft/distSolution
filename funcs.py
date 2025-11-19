@@ -47,16 +47,16 @@ def showDiffAndExit(outdir, shouldBeFull, shouldTotal, exact):
     (targetOver, listOver) = getPathDiffs(shouldBeFull, current)
 
     message = ''
-    if(targetOver):
+    if (targetOver):
         message += "Target directory contains following unlisted files:\n"
         message += "\n".join(str(e) for e in targetOver)
-    if(listOver):
+    if (listOver):
         message == "\n"
         message += "[ShouldBeFiles] list contains following non-existent files:\n"
         message += "\n".join(str(e) for e in listOver)
 
-    if(exact):
-        if(message):
+    if (exact):
+        if (message):
             myexit(message)
     else:
         message = "TotalFileCount different. ({} != {})\n".format(
