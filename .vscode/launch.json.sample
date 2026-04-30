@@ -4,23 +4,55 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
         {
             "name": "distSolution",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/distSolution.py",
             "args": [
-                // "--skip-build", 
-                // "--skip-check",
-                // "--skip-archive",
+                "--skip-build",
+                "--skip-check",
+                "--skip-archive",
                 "--skip-upload",
                 "--skip-hashcheck",
-                "--skip-bbs",
+                // "--skip-bbs",
                 // "--show-dummygitrev-txt",
-                "--show-dummygitrev",
-                "-C", "C:/local/msys2/home/gr4KOtfs/gitdev/Dicregate/trunk/Dicregate/", 
-                // "C:/local/msys2/home/gr4KOtfs/gitdev/Dicregate/trunk/Dicregate/dist.json"
+                // "--show-dummygitrev",
+                "-C",
+                "C:/local/msys2/home/ji3fjaVa/gitdev/distExample",
+                "C:/local/msys2/home/ji3fjaVa/gitdev/distExample/dist.json"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "distQt",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/distQt.py",
+            "args": [
+                // "--skip-build",
+                // "--skip-check",
+                // "--skip-archive",
+                // "--skip-upload",
+                // "--skip-hashcheck",
+                // "--skip-bbs",
+                // "--show-dummygitrev-txt",
+                // "--show-dummygitrev",
+                "-C",
+                "C:/local/msys2/home/ji3fjaVa/gitdev/SceneExplorer",
+                "src/SceneExplorer.pro",
+                "-distdir",
+                "C:/Linkout/SceneExplorer",
+                "-qtroot",
+                "C:/local/Qt",
+                "-qtversion",
+                "5.15.2",
+                "-qtversiontools",
+                "msvc2019_64",
+                "-distfile",
+                "C:/local/msys2/home/ji3fjaVa/gitdev/SceneExplorer/dist.json",
+                "-make",
+                "nmake"
             ],
             "console": "integratedTerminal"
         },
