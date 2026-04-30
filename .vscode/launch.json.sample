@@ -10,17 +10,17 @@
             "request": "launch",
             "program": "${workspaceFolder}/distSolution.py",
             "args": [
-                "--skip-build",
-                "--skip-check",
-                "--skip-archive",
+                // "--skip-build",
+                // "--skip-check",
+                // "--skip-archive",
                 "--skip-upload",
                 "--skip-hashcheck",
                 // "--skip-bbs",
                 // "--show-dummygitrev-txt",
                 // "--show-dummygitrev",
                 "-C",
-                "C:/local/msys2/home/ji3fjaVa/gitdev/distExample",
-                "C:/local/msys2/home/ji3fjaVa/gitdev/distExample/dist.json"
+                "C:/local/msys2/home/vJ3jfMvss/gitdev/distExample/17",
+                "C:/local/msys2/home/vJ3jfMvss/gitdev/distExample/17/dist.json"
             ],
             "console": "integratedTerminal"
         },
@@ -32,14 +32,14 @@
             "args": [
                 // "--skip-build",
                 // "--skip-check",
-                // "--skip-archive",
-                // "--skip-upload",
+                "--skip-archive",
+                "--skip-upload",
                 // "--skip-hashcheck",
                 // "--skip-bbs",
                 // "--show-dummygitrev-txt",
                 // "--show-dummygitrev",
                 "-C",
-                "C:/local/msys2/home/ji3fjaVa/gitdev/SceneExplorer",
+                "C:/local/msys2/home/vJ3jfMvss/gitdev/SceneExplorer",
                 "src/SceneExplorer.pro",
                 "-distdir",
                 "C:/Linkout/SceneExplorer",
@@ -48,11 +48,11 @@
                 "-qtversion",
                 "5.15.2",
                 "-qtversiontools",
-                "msvc2019_64",
+                "mingw81_32",
                 "-distfile",
-                "C:/local/msys2/home/ji3fjaVa/gitdev/SceneExplorer/dist.json",
+                "C:/local/msys2/home/vJ3jfMvss/gitdev/SceneExplorer/dist.json",
                 "-make",
-                "nmake"
+                "mingw32-make.exe"
             ],
             "console": "integratedTerminal"
         },

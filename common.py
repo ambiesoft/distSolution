@@ -142,7 +142,7 @@ class DistConfig:
         if os.path.isfile(archiveexefull):
             myexit('{} already exists, remove it first.'.format(archiveexefull))
 
-        args = [
+        args7z = [
             path7z,
             "a",
             "-sfx7z.sfx",
@@ -150,10 +150,15 @@ class DistConfig:
             targetdir,
         ]
 
-        args.append("-mx9")
+        args7z.append("-m0=lzma2")
+        args7z.append("-mx9")
+        args7z.append("-mmt=on")
+        args7z.append("-md=512m")
+        args7z.append("-mfb=273")
+        args7z.append("-ms=on")
 
-        print(args)
-        subprocess.check_call(args)
+        print(args7z)
+        subprocess.check_call(args7z)
 
     def checkAlreadyUploaded(self, verstring):
         """ check remote archive exist and quit if true. """
@@ -202,6 +207,9 @@ class DistConfig:
 
     def getCopyTranslations(self):
         return self.configs['copytranslations']
+    
+    def getRemoteOneDriveDir(self):
+        return self.configs['remoteonedrivedir']
 
 
 COMMONCODEHEAD = '''// DO NOT EDIT

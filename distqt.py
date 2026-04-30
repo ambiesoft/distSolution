@@ -339,21 +339,28 @@ def main():
     if not commandArgs.skip_archive:
         print("==== creating archive ====")
         print('version is {0}'.format(verstr))
-        distconfig.checkAlreadyUploaded(verstr)
+        
+        # distconfig.checkAlreadyUploaded(verstr)
+        
         distconfig.createArchive(
-            r"C:\LegacyPrograms\7-Zip\7z.exe", distdir, verstr)
+            r"C:\LegacyPrograms\7z\7z.exe", distdir, verstr)
 
     if not commandArgs.skip_upload:
         print("==== uploading archive ====")
         distconfig.upload()
 
     if not commandArgs.skip_bbs:
-        # update BBS
         print("==== Updating BBS... ====")
-        print(updateBBS(distconfig.getProjectName(),
-                        verstr,
-                        distconfig.getRemoteDir() + distconfig.getArchiveName(verstr),
-                        distconfig.getChangeLong(distdir)))
+        if not distconfig.getRemoteOneDriveDir():
+            myexit("remoteonedrivedir is not specified in config.")
+
+        # historyFull = os.path.join(distconfig.getOutDir(),
+        #                            distconfig.getObtainVerFrom())
+        # versionReg = distconfig.getObtainVerRegex()
+        updateBBS(distconfig.getProjectName(),
+                  verstr,
+                  distconfig.getRemoteOneDriveDir(),
+                  distconfig.getChangeLong(distdir))
 
 
 if __name__ == "__main__":
